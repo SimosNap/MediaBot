@@ -104,4 +104,5 @@ dist
 .tern-port
 
 # bot configuration
-src/conf/
+src/conf/config.json
+src/conf/db.json

@@ -1,0 +1,9 @@
+{
+  "host"     : "localhost",
+  "user"     : "mediabot",
+  "password" : "dbpassword",
+  "database" : "mediabot",
+  "waitForConnections": true,
+  "connectionLimit": 10,
+  "queueLimit": 0
+}

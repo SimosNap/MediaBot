@@ -1,0 +1,22 @@
+{
+    "client": {
+	    "host": "irc.simosnap.com",
+	    "port": 6697,
+	    "tls": true,
+	    "nick": "MediaBot",
+        "gecos": "MediaBot",
+        "auto_reconnect": true,
+        "auto_reconnect_max_wait": 300000,
+        "auto_reconnect_max_retries": 3,
+        "ping_interval": 30,
+        "ping_timeout": 120,
+        "account": {
+            "account": "changethis",
+            "password": "changethis"
+        }
+    },
+    "botcentral": [
+        "#botcentral"
+    ],
+    "prefix": "!"
+}
