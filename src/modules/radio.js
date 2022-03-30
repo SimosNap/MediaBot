@@ -1,30 +1,26 @@
-const cron = require('node-cron');
 const fetch = require('node-fetch');
 const utils = require('../misc/utils.js');
 
 module.exports = class radio {
     constructor(bot, config, channels, dbCon) {
-        const jobs = new Object();
-        const playjobs = new Object();
+        const jobs = {};
+        const playjobs = {};
 
-        bot.on('join', async (event) => {
-
+        bot.on('join', async(event) => {
             if (event.nick.toLowerCase() === bot.user.nick.toLowerCase()) {
-
                 const chan = channels[event.channel.toLowerCase()]; if (!chan) { console.error('i expected a channel object'); return; }
 
-                if(!chan.source) {
+                if (!chan.source) {
                     return;
                 }
 
                 if (chan.motd && chan.announce > 0) {
-
                     const timeoutID = setInterval(() => {
                         const tagData = [
                             chan.radioname,
                             chan.mbID,
                         ];
-                        bot.say(chan.name, `Ascolta ${chan.radioname} - ${chan.motd} https://media.simosnap.com/player/${chan.mbID}`, {'+simosnap.org/radio_station': tagData.join(';')});
+                        bot.say(chan.name, `Ascolta ${chan.radioname} - ${chan.motd} https://media.simosnap.com/player/${chan.mbID}`, { '+simosnap.org/radio_station': tagData.join(';') });
                     }, (60000 * chan.timer));
                     jobs[chan.name] = timeoutID;
                 }
@@ -36,10 +32,10 @@ module.exports = class radio {
                             return;
                         }
 
-                        let artist = json.icestats.source.artist;
-                        let song = json.icestats.source.song;
-                        let nowplay = json.icestats.source.yp_currently_playing;
-                        let bitrate = json.icestats.source.bitrate;
+                        // const artist = json.icestats.source.artist;
+                        // const song = json.icestats.source.song;
+                        const nowplay = json.icestats.source.yp_currently_playing;
+                        const bitrate = json.icestats.source.bitrate;
 
                         const tagData = [
                             nowplay,
@@ -47,42 +43,38 @@ module.exports = class radio {
                             chan.radioname,
                             chan.mbID,
                         ];
-                        bot.say(event.channel, `[ Adesso su ${chan.radioname}  ] ${nowplay} ${bitrate}kbs https://media.simosnap.com/player/${chan.mbID}`, {'+simosnap.org/radio_stream': tagData.join(';')});
+                        bot.say(event.channel, `[ Adesso su ${chan.radioname}  ] ${nowplay} ${bitrate}kbs https://media.simosnap.com/player/${chan.mbID}`, { '+simosnap.org/radio_stream': tagData.join(';') });
                     }, (60000 * 5));
                     playjobs[event.channel] = timeoutID;
                 }
             }
         });
 
-        bot.on('message', async (event) => {
-
+        bot.on('message', async(event) => {
             if (event.tags['+simosnap.org/radio_request']) {
+                const msgs = event.message.split('|');
+                const req = msgs[0];
+                const msg = msgs[1];
+                const rtags = event.tags['+simosnap.org/radio_request'].split(';');
+                const mbID = rtags[0];
+                const targetchan = rtags[1];
+                const dj = rtags[2];
+                const ts = Math.round((new Date()).getTime() / 1000);
 
-                let msgs = event.message.split('|');
-                let req = msgs[0];
-                let msg = msgs[1];
-                let rtags = event.tags['+simosnap.org/radio_request'].split(';');
-                let mbID = rtags[0];
-                let targetchan = rtags[1];
-                let dj = rtags[2];
-                let ts = Math.round((new Date()).getTime() / 1000);
-
-                bot.notice(dj, '* Hai ricevuto una richiesta da ' + event.nick );
-                bot.notice(dj, '* Richiesta: ' + req );
-                bot.notice(dj, '* Messaggio: ' + msg );
+                bot.notice(dj, '* Hai ricevuto una richiesta da ' + event.nick);
+                bot.notice(dj, '* Richiesta: ' + req);
+                bot.notice(dj, '* Messaggio: ' + msg);
 
                 dbCon.query('INSERT INTO magirc_mediabot_radio_requests (rid, nick, account, request, message, channel, ts) values  (?, ?, ?, ?, ?, ?, ?)', [mbID, event.nick, event.tags.account, req, msg, targetchan, ts], function (error, results, fields) {
                     if (error) throw error;
                 });
-
             }
         });
 
-        bot.on('bot.command.radio', async (event) => {
-
+        bot.on('bot.command.radio', async(event) => {
             const chan = channels[event.replyTarget.toLowerCase()]; if (!chan) { console.error('i expected a channel object'); return; }
 
-            if(!chan.source) {
+            if (!chan.source) {
                 bot.say(event.replyTarget, 'Il modulo radio non è abilitato per questo canale');
                 return;
             }
@@ -94,352 +86,365 @@ module.exports = class radio {
                 return;
             }
 
-            if (!chan.radioname || chan.radioname == '') {
-                bot.say(event.replyTarget, 'Non hai configurato nessuna stazione radio per il canale '+ event.replyTarget +'. Per configurare una stazione radio usa il pannello account https://www.simosnap.org/account');
+            if (!chan.radioname || chan.radioname === '') {
+                bot.say(event.replyTarget, 'Non hai configurato nessuna stazione radio per il canale ' + event.replyTarget + '. Per configurare una stazione radio usa il pannello account https://www.simosnap.org/account');
                 return;
             }
 
             switch (event.botParams[0]) {
-                case '+dj':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
+            case '+dj': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
 
-                    if (!event.botParams[1]) {
-                        bot.notice(event.nick, 'Devi specificare il nickname del Dj');
-                        return;
-                    }
+                if (!event.botParams[1]) {
+                    bot.notice(event.nick, 'Devi specificare il nickname del Dj');
+                    return;
+                }
 
-                    if (!chan.getUser(event.botParams[1])) {
-                        bot.notice(event.nick, 'Il Dj deve essere un nickname online e presente nel canale');
-                        return;
-                    }
+                if (!chan.getUser(event.botParams[1])) {
+                    bot.notice(event.nick, 'Il Dj deve essere un nickname online e presente nel canale');
+                    return;
+                }
 
-                    dbCon.query('UPDATE magirc_mediabot_radio SET dj = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.dj = event.botParams[1];
-                        bot.notice(event.nick, 'Hai impostato il Dj della stazione radio con successo');
-                    });
-                    break;
-                case '-dj':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
+                dbCon.query('UPDATE magirc_mediabot_radio SET dj = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.dj = event.botParams[1];
+                    bot.notice(event.nick, 'Hai impostato il Dj della stazione radio con successo');
+                });
+                break;
+            }
+            case '-dj': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                dbCon.query('UPDATE magirc_mediabot_radio SET dj = \'\'  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.dj = '';
+                    bot.notice(event.nick, 'Hai rimosso il Dj della stazione radio con successo');
+                });
+                dbCon.query('UPDATE magirc_mediabot_radio SET requests = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.requests = 0;
+                    bot.notice(event.nick, 'Rimuovendo il Dj, le richieste musicali sono state disabilitate automaticamente');
+                });
+                break;
+            }
+            case 'enableadv': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                if (chan.announce === 1) {
+                    bot.notice(event.nick, 'Il messaggio promozionale della stazione radio è già abilitato');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET announce = 1  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.announce = 1;
+                    bot.notice(event.nick, 'Hai abilitato l\' invio del messaggio promozionale della stazione radio con successo');
+
+                    const timeoutID = setInterval(() => {
+                        const tagData = [
+                            chan.radioname,
+                            chan.mbID,
+                        ];
+                        bot.say(chan.name, 'Ascolta ' + chan.radioname + ' - ' + chan.motd + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_station': tagData.join(';') });
+                    }, (60000 * chan.timer));
+                    jobs[chan.name] = timeoutID;
+                });
+                break;
+            }
+            case 'disableadv': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                dbCon.query('UPDATE magirc_mediabot_radio SET announce = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.announce = 0;
+                    bot.notice(event.nick, 'Hai disabilitato l\' invio del messaggio promozionale della stazione radio con successo');
+                    clearInterval(jobs[event.replyTarget]);
+                    delete jobs[event.replyTarget];
+                });
+                break;
+            }
+            case 'enablenowplay': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                if (chan.nowplay === 1) {
+                    bot.notice(event.nick, 'L\' invio delle informazioni sullo streming della stazione radio è già abilitato');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET nowplay = 1  WHERE channel = ? ', [event.replyTarget], async function (error, results, fields) {
+                    if (error) throw error;
+                    chan.nowplay = 1;
+                    bot.notice(event.nick, 'Hai abilitato l\' invio delle informazioni sullo streming della stazione radio con successo');
+
+                    const timeoutID = setInterval(async() => {
+                        const json = await fetch(chan.icestats).then((r) => r.json());
+                        if (!json) {
+                            return;
+                        }
+
+                        const artist = json.icestats.source.artist;
+                        const song = json.icestats.source.artist;
+                        const nowplay = json.icestats.source.yp_currently_playing;
+
+                        const tagData = [
+                            artist,
+                            song,
+                        ];
+                        bot.say(event.replyTarget, '[ Adesso su ' + chan.radioname + ' ] ' + nowplay + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_stream': tagData.join(';') });
+                    }, (60000 * 5));
+                    playjobs[event.replyTarget] = timeoutID;
+                });
+                break;
+            }
+            case 'disablenowplay': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                dbCon.query('UPDATE magirc_mediabot_radio SET nowplay = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.nowplay = 0;
+                    bot.notice(event.nick, 'Hai disabilitato l\' invio delle informazioni sullo streming della stazione radio con successo');
+                    clearInterval(playjobs[event.replyTarget]);
+                    delete playjobs[event.replyTarget];
+                });
+                break;
+            }
+            case 'enablerequest': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                if (chan.dj === '') {
+                    bot.notice(event.nick, 'E\' necessario impostare un Dj prima di abilitare la ricezione di richieste musicali');
+                    return;
+                }
+                dbCon.query('UPDATE magirc_mediabot_radio SET requests = 1  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.requests = 1;
+                    bot.notice(event.nick, 'Hai abilitato la ricezione di richieste musicali');
+                });
+                break;
+            }
+            case 'disablerequest': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                dbCon.query('UPDATE magirc_mediabot_radio SET requests = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.requests = 0;
+                    bot.notice(event.nick, 'Hai disabilitato la ricezione di richieste musicali');
+                });
+                break;
+            }
+            case '+www': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+
+                if (!event.botParams[1]) {
+                    bot.notice(event.nick, 'Devi specificare  l\'indirizzo del sito web');
+                    return;
+                }
+
+                if (!utils.isValidURL(event.botParams[1])) {
+                    bot.notice(event.nick, 'Devi specificare un URL valido');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET website = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.website = event.botParams[1];
+                    bot.notice(event.nick, 'Hai impostato il sito web della stazione radio con successo');
+                });
+                break;
+            }
+            case '-www': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                dbCon.query('UPDATE magirc_mediabot_radio SET website = \'\'  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.website = '';
+                    bot.notice(event.nick, 'Hai rimosso il sito web della stazione radio con successo');
+                });
+                break;
+            }
+            case '+twitch': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+
+                if (!event.botParams[1]) {
+                    bot.notice(event.nick, 'Devi specificare  l\'indirizzo del canale Twitch');
+                    return;
+                }
+
+                if (!utils.isValidURL(event.botParams[1])) {
+                    bot.notice(event.nick, 'Devi specificare un URL valido');
+                    return;
+                }
+
+                if (!event.botParams[1].match(/^https:\/\/www\.twitch\.tv\/(.+)/)) {
+                    bot.notice(event.nick, 'Devi specificare un canale Twitch valido');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET twitch = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.twitch = event.botParams[1];
+                    bot.notice(event.nick, 'Hai impostato il canale Twitch della stazione radio con successo');
+                });
+                break;
+            }
+            case '-twitch': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+                dbCon.query('UPDATE magirc_mediabot_radio SET twitch = \'\'  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.twitch = '';
+                    bot.notice(event.nick, 'Hai rimosso il canale Twitch della stazione radio con successo');
+                });
+                break;
+            }
+            case 'stats': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+
+                if (!event.botParams[1]) {
+                    bot.notice(event.nick, 'Devi specificare l\'indirizzo delle statistiche XML di ICECast');
+                    return;
+                }
+
+                if (!utils.isValidURL(event.botParams[1])) {
+                    bot.notice(event.nick, 'Devi specificare un URL valido');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET icestats = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.icestats = event.botParams[1];
+                    bot.notice(event.nick, 'Hai impostato l\' indirizzo per le statistiche icecast della stazione radio con successo');
+                });
+                break;
+            }
+            case 'logo': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+
+                if (!event.botParams[1]) {
+                    bot.notice(event.nick, 'Devi specificare  l\'indirizzo del logo della stazione radio');
+                    return;
+                }
+
+                if (!utils.isValidURL(event.botParams[1])) {
+                    bot.notice(event.nick, 'Devi specificare un URL valido');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET logo = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.logo = event.botParams[1];
+                    bot.notice(event.nick, 'Hai aggiornato il logo della stazione radio con successo');
+                });
+                break;
+            }
+            case 'motd': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+
+                let motd = '';
+                if (event.botParams[1]) {
+                    const argcount = event.botParams.length;
+                    for (let i = 1; i < argcount; i++) {
+                        if (i >= 1) {
+                            motd += event.botParams[i] + ' ';
+                        }
                     }
-                    dbCon.query('UPDATE magirc_mediabot_radio SET dj = \'\'  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.dj = '';
-                        bot.notice(event.nick, 'Hai rimosso il Dj della stazione radio con successo');
-                    });
-                    dbCon.query('UPDATE magirc_mediabot_radio SET requests = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.requests = 0;
-                        bot.notice(event.nick, 'Rimuovendo il Dj, le richieste musicali sono state disabilitate automaticamente');
-                    });
-                    break;
-                case 'enableadv':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
+                    motd = motd.trim();
+                    // const motd = event.botParams.slice(1).join(' ').trim();
+                } else {
+                    bot.notice(event.nick, 'Devi specificare il testo del MOTD');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET description = ?  WHERE channel = ? ', [motd, event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.motd = event.botParams[1];
+                    bot.notice(event.nick, 'Hai aggiornato il MOTD della stazione radio con successo');
+                });
+                break;
+            }
+            case 'timer': {
+                if (!isOwner) {
+                    bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
+                    return;
+                }
+
+                if (!event.botParams[1]) {
+                    bot.notice(event.nick, 'Devi specificare  un intervallo in minuti per il timer degli annunci');
+                    return;
+                }
+
+                if (isNaN(event.botParams[1])) {
+                    bot.notice(event.nick, 'Il valore dell\' intervallo del timer deve essere un valore numerico');
+                    return;
+                }
+
+                if (event.botParams[1] < 10) {
+                    bot.notice(event.nick, 'Non puoi impostare un intervallo di tempo inferiore a 10 minuti per il timer degli annunci');
+                    return;
+                }
+
+                if (event.botParams[1] > 60) {
+                    bot.notice(event.nick, 'Non puoi impostare un intervallo di tempo superiore a 60 minuti per il timer degli annunci');
+                    return;
+                }
+
+                dbCon.query('UPDATE magirc_mediabot_radio SET timer = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
+                    if (error) throw error;
+                    chan.timer = event.botParams[1];
+                    bot.notice(event.nick, 'Hai impostato la frequenza dell\'annuncio ogni ' + event.botParams[1] + ' minuti');
                     if (chan.announce === 1) {
-                        bot.notice(event.nick, 'Il messaggio promozionale della stazione radio è già abilitato');
-                        return;
-                    }
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET announce = 1  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.announce = 1;
-                        bot.notice(event.nick, 'Hai abilitato l\' invio del messaggio promozionale della stazione radio con successo');
+                        clearInterval(jobs[event.replyTarget]);
+                        delete jobs[event.replyTarget];
 
                         const timeoutID = setInterval(() => {
                             const tagData = [
                                 chan.radioname,
                                 chan.mbID,
                             ];
-                            bot.say(chan.name, 'Ascolta ' + chan.radioname + ' - ' + chan.motd + ' https://media.simosnap.com/player/' + chan.mbID, {'+simosnap.org/radio_station': tagData.join(';')});
-                        }, (60000 * chan.timer));
-                        jobs[chan.name] = timeoutID;
-
-                    });
-                    break;
-                case 'disableadv':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
+                            bot.say(chan.name, 'Ascolta ' + chan.radioname + ' - ' + chan.motd + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_station': tagData.join(';') });
+                        }, (60000 * event.botParams[1]));
+                        jobs[event.replyTarget] = timeoutID;
                     }
-                    dbCon.query('UPDATE magirc_mediabot_radio SET announce = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.announce = 0;
-                        bot.notice(event.nick, 'Hai disabilitato l\' invio del messaggio promozionale della stazione radio con successo');
-                        clearInterval(jobs[event.replyTarget]);
-                        delete jobs[event.replyTarget];
-                    });
-                    break;
-                case 'enablenowplay':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-                    if (chan.nowplay === 1) {
-                        bot.notice(event.nick, 'L\' invio delle informazioni sullo streming della stazione radio è già abilitato');
-                        return;
-                    }
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET nowplay = 1  WHERE channel = ? ', [event.replyTarget], async function (error, results, fields) {
-                        if (error) throw error;
-                        chan.nowplay = 1;
-                        bot.notice(event.nick, 'Hai abilitato l\' invio delle informazioni sullo streming della stazione radio con successo');
-
-                        const timeoutID = setInterval(async() => {
-                            const json = await fetch(chan.icestats).then((r) => r.json());
-                            if (!json) {
-                                return;
-                            }
-
-                            let artist = json.icestats.source.artist;
-                            let song = json.icestats.source.artist;
-                            let nowplay = json.icestats.source.yp_currently_playing;
-
-                            const tagData = [
-                                artist,
-                                song,
-                            ];
-                            bot.say(event.replyTarget, '[ Adesso su ' + chan.radioname + ' ] ' + nowplay + ' https://media.simosnap.com/player/' + chan.mbID, {'+simosnap.org/radio_stream': tagData.join(';')});
-                        }, (60000 * 5));
-                        playjobs[event.replyTarget] = timeoutID;
-
-                    });
-                    break;
-                case 'disablenowplay':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-                    dbCon.query('UPDATE magirc_mediabot_radio SET nowplay = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.nowplay = 0;
-                        bot.notice(event.nick, 'Hai disabilitato l\' invio delle informazioni sullo streming della stazione radio con successo');
-                        clearInterval(playjobs[event.replyTarget]);
-                        delete playjobs[event.replyTarget];
-                    });
-                    break;
-                case 'enablerequest':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-                    if (chan.dj == '') {
-                        bot.notice(event.nick, 'E\' necessario impostare un Dj prima di abilitare la ricezione di richieste musicali');
-                        return;
-                    }
-                    dbCon.query('UPDATE magirc_mediabot_radio SET requests = 1  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.requests = 1;
-                        bot.notice(event.nick, 'Hai abilitato la ricezione di richieste musicali');
-                    });
-                    break;
-                case 'disablerequest':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-                    dbCon.query('UPDATE magirc_mediabot_radio SET requests = 0  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.requests = 0;
-                        bot.notice(event.nick, 'Hai disabilitato la ricezione di richieste musicali');
-                    });
-                    break;
-                case '+www':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-
-                    if (!event.botParams[1]) {
-                        bot.notice(event.nick, 'Devi specificare  l\'indirizzo del sito web');
-                        return;
-                    }
-
-                    if (!utils.isValidURL(event.botParams[1])) {
-                        bot.notice(event.nick, 'Devi specificare un URL valido');
-                        return;
-                    }
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET website = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.website = event.botParams[1];
-                        bot.notice(event.nick, 'Hai impostato il sito web della stazione radio con successo');
-                    });
-                    break;
-                case '-www':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-                    dbCon.query('UPDATE magirc_mediabot_radio SET website = \'\'  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.website = '';
-                        bot.notice(event.nick, 'Hai rimosso il sito web della stazione radio con successo');
-                    });
-                    break;
-                case '+twitch':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-
-                    if (!event.botParams[1]) {
-                        bot.notice(event.nick, 'Devi specificare  l\'indirizzo del canale Twitch');
-                        return;
-                    }
-
-                    if (!utils.isValidURL(event.botParams[1])) {
-                        bot.notice(event.nick, 'Devi specificare un URL valido');
-                        return;
-                    }
-
-                    if (!event.botParams[1].match(/^https:\/\/www\.twitch\.tv\/(.+)/)) {
-                        bot.notice(event.nick, 'Devi specificare un canale Twitch valido');
-                        return;
-                    }
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET twitch = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.twitch = event.botParams[1];
-                        bot.notice(event.nick, 'Hai impostato il canale Twitch della stazione radio con successo');
-                    });
-                    break;
-                case '-twitch':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-                    dbCon.query('UPDATE magirc_mediabot_radio SET twitch = \'\'  WHERE channel = ? ', [event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.twitch = '';
-                        bot.notice(event.nick, 'Hai rimosso il canale Twitch della stazione radio con successo');
-                    });
-                    break;
-                case 'stats':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-
-                    if (!event.botParams[1]) {
-                        bot.notice(event.nick, 'Devi specificare l\'indirizzo delle statistiche XML di ICECast');
-                        return;
-                    }
-
-                    if (!utils.isValidURL(event.botParams[1])) {
-                        bot.notice(event.nick, 'Devi specificare un URL valido');
-                        return;
-                    }
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET icestats = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.icestats = event.botParams[1];
-                        bot.notice(event.nick, 'Hai impostato l\' indirizzo per le statistiche icecast della stazione radio con successo');
-                    });
-                    break;
-                case 'logo':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-
-                    if (!event.botParams[1]) {
-                        bot.notice(event.nick, 'Devi specificare  l\'indirizzo del logo della stazione radio');
-                        return;
-                    }
-
-                    if (!utils.isValidURL(event.botParams[1])) {
-                        bot.notice(event.nick, 'Devi specificare un URL valido');
-                        return;
-                    }
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET logo = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.logo = event.botParams[1];
-                        bot.notice(event.nick, 'Hai aggiornato il logo della stazione radio con successo');
-                    });
-                    break;
-                case 'motd':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-
-					let motd = '';
-					if (event.botParams[1]) {
-						let argcount = event.botParams.length;
-					    for(let i = 1; i < argcount; i++){
-						    if (i >= 1) {
-						    	motd += event.botParams[i] + ' ';
-					        }
-					    }
-					    motd = motd.trim();
-					} else {
-						bot.notice(event.nick, 'Devi specificare il testo del MOTD');
-						return;
-					}
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET description = ?  WHERE channel = ? ', [motd, event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.motd = event.botParams[1];
-                        bot.notice(event.nick, 'Hai aggiornato il MOTD della stazione radio con successo');
-                    });
-                    break;
-                case 'timer':
-                    if (!isOwner) {
-                        bot.notice(event.nick, 'E\' richiesto lo stato di Owner per configurare il bot');
-                        return;
-                    }
-
-                    if (!event.botParams[1]) {
-                        bot.notice(event.nick, 'Devi specificare  un intervallo in minuti per il timer degli annunci');
-                        return;
-                    }
-
-                    if (isNaN(event.botParams[1])) {
-                        bot.notice(event.nick, 'Il valore dell\' intervallo del timer deve essere un valore numerico');
-                        return;
-                    }
-
-                    if (event.botParams[1] < 10) {
-                        bot.notice(event.nick, 'Non puoi impostare un intervallo di tempo inferiore a 10 minuti per il timer degli annunci');
-                        return;
-                    }
-
-                    if (event.botParams[1] > 60) {
-                        bot.notice(event.nick, 'Non puoi impostare un intervallo di tempo superiore a 60 minuti per il timer degli annunci');
-                        return;
-                    }
-
-                    dbCon.query('UPDATE magirc_mediabot_radio SET timer = ?  WHERE channel = ? ', [event.botParams[1], event.replyTarget], function (error, results, fields) {
-                        if (error) throw error;
-                        chan.timer = event.botParams[1];
-                        bot.notice(event.nick, 'Hai impostato la frequenza dell\'annuncio ogni ' + event.botParams[1] + ' minuti');
-                        if (chan.announce === 1) {
-                            clearInterval(jobs[event.replyTarget]);
-                            delete jobs[event.replyTarget];
-
-                            const timeoutID = setInterval(() => {
-                                const tagData = [
-                                    chan.radioname,
-                                    chan.mbID,
-                                ];
-                                bot.say(chan.name, 'Ascolta ' + chan.radioname + ' - ' + chan.motd + ' https://media.simosnap.com/player/' + chan.mbID, {'+simosnap.org/radio_station': tagData.join(';')});
-                            }, (60000 * event.botParams[1]));
-                            jobs[event.replyTarget] = timeoutID;
-                        }
-
-                    });
-                    break;
+                });
+                break;
             }
-            return;
+            }
         });
     }
 };

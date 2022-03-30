@@ -1,23 +1,23 @@
 const path = require('path');
 const fs = require('fs');
-const json = require('json5');
+// const json = require('json5');
 const IRC = require('irc-framework');
-const mysql      = require('mysql2');
-//const settings = require('./conf/settings.json');
-//const db = require('conf/db.json');
+const mysql = require('mysql2');
+// const settings = require('./conf/settings.json');
+// const db = require('conf/db.json');
 
 const Channel = require('./lib/channel');
 
 const debugRaw = false;
 const debugEvents = false;
 
-database="./conf/db.json";
-let dbdata = fs.readFileSync(database);
+const database = './conf/db.json';
+const dbdata = fs.readFileSync(database);
 const dbConf = JSON.parse(dbdata);
 const dbCon = mysql.createPool(dbConf);
 
-filename="./conf/config.json";
-let rawdata = fs.readFileSync(filename);
+const filename = './conf/config.json';
+const rawdata = fs.readFileSync(filename);
 const config = JSON.parse(rawdata);
 
 // Catch uncaught exceptions so the bot does not crash
@@ -30,7 +30,7 @@ const bot = new IRC.Client();
 bot.use(ircMiddleware());
 
 const channels = Object.create(null);
- 
+
 dbCon.query(`
     SELECT 
         m.id as mbID, 
@@ -54,14 +54,14 @@ dbCon.query(`
         ON m.id = r.id LEFT JOIN magirc_mediabot_youtube as y 
         ON m.id = y.id LEFT JOIN magirc_mediabot_mixcloud as c 
         ON m.id = c.id`,
-    (error, results, fields) => {
-        if (error) throw error;
-        for (const row of results) {
-            const chan = new Channel(bot, row.name);
-            channels[chan.name.toLowerCase()] = chan;
-            Object.assign(chan, row);
-        }
+(error, results, fields) => {
+    if (error) throw error;
+    for (const row of results) {
+        const chan = new Channel(bot, row.name);
+        channels[chan.name.toLowerCase()] = chan;
+        Object.assign(chan, row);
     }
+},
 );
 
 bot.findAccount = (accountName) => {
@@ -107,23 +107,18 @@ for (const file of moduleFiles) {
     }
 }
 
-bot.connect( config.client );
+bot.connect(config.client);
 
-bot.on('registered', function() {
-    
-    
+bot.on('registered', function () {
     bot.raw(`oper ${config.client.oper.name} ${config.client.oper.password}`);
-    
-    //join main channel
-	//bot.join(config.botcentral);
-    
-    //add botcentral channel to the channels object with all modules disabled
+
+    // add botcentral channel to the channels object with all modules disabled
     const chan = new Channel(bot, config.botcentral);
     channels[chan.name.toLowerCase()] = chan;
-    const obj = { mbID : 0, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 0, requests: 0, youtube: 0, mixcloud: 0 };
+    const obj = { mbID: 0, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 0, requests: 0, youtube: 0, mixcloud: 0 };
     Object.assign(chan, obj);
 
-    //join botcentral and subscribed channels
+    // join botcentral and subscribed channels
     for (const channel of Object.values(channels)) {
         channel.join();
     }
