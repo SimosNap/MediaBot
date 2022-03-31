@@ -33,7 +33,7 @@ module.exports = class HttpAPI {
         // ctx.body = `Request Body: ${JSON.stringify(ctx.request.body)}`;
         const newChan = ctx.request?.body?.channel;
         const mbID = ctx.request?.body?.mbID;
-
+        
         if (this.inProgress.chanJoin) {
             ctx.response.status = 500;
             ctx.response.body = 'channel Join already in progress';
@@ -61,7 +61,9 @@ module.exports = class HttpAPI {
         }
 
         try {
-            const addedChan = await ircPromises.joinChan(this.bot, newChan, this.channels);
+            const chan = new Channel(newChan);
+            channels[chan.name] = chan;
+            const addedChan = await ircPromises.joinChan(this.bot, chan, this.dbCon);
             ctx.response.status = 200;
             ctx.response.body = { nick: addedChan };
         } catch (err) {
