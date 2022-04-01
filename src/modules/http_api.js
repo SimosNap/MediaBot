@@ -32,7 +32,6 @@ module.exports = class HttpAPI {
     }
 
     async handleAddBot(ctx) {
-
         const newChan = ctx.request?.body?.channel;
 
         if (this.inProgress.chanJoin) {
