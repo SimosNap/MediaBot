@@ -9,6 +9,7 @@ module.exports = class HttpAPI {
     constructor(bot, config, channels, dbCon) {
         this.bot = bot;
         this.channels = channels;
+        this.dbCon = dbCon;
 
         this.inProgress = Object.create(null);
 
@@ -21,7 +22,7 @@ module.exports = class HttpAPI {
         });
 
         this.api.post('/add/bot', this.handleAddBot.bind(this));
-        this.api.post('/set/radio', this.handleSetRadio.bind(this));
+        // this.api.post('/set/radio', this.handleSetRadio.bind(this));
 
         this.koa.use(this.api.routes());
         this.koa.use(this.api.allowedMethods());
@@ -31,9 +32,9 @@ module.exports = class HttpAPI {
     }
 
     async handleAddBot(ctx) {
-        // ctx.body = `Request Body: ${JSON.stringify(ctx.request.body)}`;
+
         const newChan = ctx.request?.body?.channel;
-        
+
         if (this.inProgress.chanJoin) {
             ctx.response.status = 500;
             ctx.response.body = 'channel Join already in progress';
@@ -51,16 +52,15 @@ module.exports = class HttpAPI {
         }
 
         const chan = this.channels[newChan.toLowerCase()];
-        //console.log(this.channels);
+        console.log(chan);
 
         if (chan) {
             return failValidation('channel already exist');
         }
 
         try {
-            const chan = new Channel(newChan);
+            const chan = new Channel(this.bot, newChan);
             chan[chan.name] = chan;
-            
             const addedChan = await ircPromises.joinChan(this.bot, chan, this.dbCon);
             ctx.response.status = 200;
             ctx.response.body = { channel: addedChan };
