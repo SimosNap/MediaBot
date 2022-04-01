@@ -2,6 +2,7 @@ const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const koaBody = require('koa-body');
 
+const Channel = require('../lib/channel');
 const ircPromises = require('../lib/ircPromises');
 
 module.exports = class HttpAPI {
@@ -32,7 +33,6 @@ module.exports = class HttpAPI {
     async handleAddBot(ctx) {
         // ctx.body = `Request Body: ${JSON.stringify(ctx.request.body)}`;
         const newChan = ctx.request?.body?.channel;
-        const mbID = ctx.request?.body?.mbID;
         
         if (this.inProgress.chanJoin) {
             ctx.response.status = 500;
@@ -50,11 +50,8 @@ module.exports = class HttpAPI {
             return failValidation('channel required');
         }
 
-        if (!mbID) {
-            return failValidation('mbID required');
-        }
-
-        const chan = channels[newChan.toLowerCase()];
+        const chan = this.channels[newChan.toLowerCase()];
+        //console.log(this.channels);
 
         if (chan) {
             return failValidation('channel already exist');
@@ -62,10 +59,11 @@ module.exports = class HttpAPI {
 
         try {
             const chan = new Channel(newChan);
-            channels[chan.name] = chan;
+            chan[chan.name] = chan;
+            
             const addedChan = await ircPromises.joinChan(this.bot, chan, this.dbCon);
             ctx.response.status = 200;
-            ctx.response.body = { nick: addedChan };
+            ctx.response.body = { channel: addedChan };
         } catch (err) {
             ctx.response.status = 500;
             ctx.response.body = err;
