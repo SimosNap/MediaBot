@@ -147,6 +147,11 @@ module.exports = class radio {
                     chan.announce = 1;
                     bot.notice(event.nick, 'Hai abilitato l\' invio del messaggio promozionale della stazione radio con successo');
 
+                    if (jobs[chan.name]) {
+                        clearInterval(jobs[chan.name]);
+                        delete jobs[chan.name];
+                    }
+
                     const timeoutID = setInterval(() => {
                         const tagData = [
                             chan.radioname,
@@ -167,8 +172,8 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.announce = 0;
                     bot.notice(event.nick, 'Hai disabilitato l\' invio del messaggio promozionale della stazione radio con successo');
-                    clearInterval(jobs[event.replyTarget]);
-                    delete jobs[event.replyTarget];
+                    clearInterval(jobs[chan.name]);
+                    delete jobs[chan.name];
                 });
                 break;
             }
@@ -187,6 +192,11 @@ module.exports = class radio {
                     chan.nowplay = 1;
                     bot.notice(event.nick, 'Hai abilitato l\' invio delle informazioni sullo streming della stazione radio con successo');
 
+                    if (playjobs[chan.name]) {
+                        clearInterval(playjobs[chan.name]);
+                        delete playjobs[chan.name];
+                    }
+
                     const timeoutID = setInterval(async() => {
                         const json = await fetch(chan.icestats).then((r) => r.json());
                         if (!json) {
@@ -201,9 +211,9 @@ module.exports = class radio {
                             artist,
                             song,
                         ];
-                        bot.say(event.replyTarget, '[ Adesso su ' + chan.radioname + ' ] ' + nowplay + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_stream': tagData.join(';') });
+                        bot.say(chan.name, '[ Adesso su ' + chan.radioname + ' ] ' + nowplay + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_stream': tagData.join(';') });
                     }, (60000 * 5));
-                    playjobs[event.replyTarget] = timeoutID;
+                    playjobs[chan.name] = timeoutID;
                 });
                 break;
             }

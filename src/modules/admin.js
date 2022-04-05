@@ -9,8 +9,6 @@ module.exports = class admin {
             // const isOwner = chan.getUser(event.nick).modes.includes('o');
 
             if (channel.indexOf('#') === -1) {
-                // return;
-                console.log('errore 1');
                 return;
             }
 

@@ -96,6 +96,7 @@ bot.raw = function raw(...args) {
 
 // Load modules
 const modules = Object.create(null);
+bot.modules = modules;
 const modulesDir = path.join(__dirname, 'modules');
 const moduleFiles = fs.readdirSync(modulesDir).filter((f) => /.js$/.test(f));
 for (const file of moduleFiles) {

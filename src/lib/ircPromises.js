@@ -20,7 +20,7 @@ exports.joinChan = function (bot, newChan, dbCon) {
             removeListeners();
             reject(new Error(`channel failed to join: ${event.error}`));
         };
-        console.log(newChan);
+
         dbCon.query('INSERT INTO magirc_mediabot_main (name) values (?)', [newChan.name], function (error, results, fields) {
             if (error) { reject(error); return; }
 
