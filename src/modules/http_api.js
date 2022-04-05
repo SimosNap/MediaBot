@@ -26,6 +26,7 @@ module.exports = class HttpAPI {
         this.api.post('/set/radio', this.handleSetRadio.bind(this));
         this.api.post('/set/radio/advertise', this.handleSetRadioAdv.bind(this));
         this.api.post('/set/radio/nowplay', this.handleSetRadioNp.bind(this));
+        this.api.post('/set/radio/requests', this.handleSetRadioReq.bind(this));
 
         this.koa.use(this.api.routes());
         this.koa.use(this.api.allowedMethods());
@@ -84,11 +85,6 @@ module.exports = class HttpAPI {
         const logo = ctx.request?.body?.logo;
         const website = ctx.request?.body?.website;
         const twitch = ctx.request?.body?.twitch;
-        const nowplay = ctx.request?.body?.nowplay;
-        const announce = ctx.request?.body?.announce;
-        const timer = ctx.request?.body?.timer;
-        const dj = ctx.request?.body?.dj;
-        const requests = ctx.request?.body?.requests;
 
         if (this.inProgress.setRadio) {
             ctx.response.status = 500;
@@ -176,33 +172,6 @@ module.exports = class HttpAPI {
             return failValidation('invalid twitch channel URL');
         }
 
-        /* if (isNaN(nowplay)) {
-            return failValidation('not number');
-        }
-
-        if (isNaN(announce)) {
-            return failValidation('not number');
-        }
-
-        if (isNaN(timer)) {
-            return failValidation('not number');
-        }
-
-        if (timer < 10) {
-            return failValidation('timer min interval 10 min');
-        }
-
-        if (timer > 50) {
-            return failValidation('timer max interval 50 min');
-        }
-
-        if ((dj !== '') && (!chan.getUser(dj))) {
-            return failValidation('dj need to match a connected nickname ');
-        }
-
-        if (isNaN(requests)) {
-            return failValidation('not number');
-        } */
         if (update === false) {
             this.dbCon.query('INSERT INTO magirc_mediabot_radio (id, channel, name, description, source, icestats, logo, website, twitch, nowplay, announce, timer, dj, requests) values (?,?,?,?,?,?,?,?,?,0,0,30,\'\',0)', [mbID, channel, radioname, motd, source, icestats, logo, website, twitch], function (error, results, fields) {
                 if (error) throw error;
@@ -248,8 +217,6 @@ module.exports = class HttpAPI {
             return;
         }
         this.inProgress.setAdv = true;
-
-        const update = true;
 
         const failValidation = (message) => {
             delete this.inProgress.setAdv;
@@ -333,8 +300,6 @@ module.exports = class HttpAPI {
         }
         this.inProgress.nowPlay = true;
 
-        const update = true;
-
         const failValidation = (message) => {
             delete this.inProgress.nowPlay;
             ctx.throw(400, message);
@@ -399,5 +364,62 @@ module.exports = class HttpAPI {
 
         ctx.response.body = ctx.request.body;
         delete this.inProgress.nowPlay;
+    }
+
+    async handleSetRadioReq(ctx) {
+        const mbID = ctx.request?.body?.mbID;
+        const channel = ctx.request?.body?.channel;
+        const dj = ctx.request?.body?.dj;
+        const requests = ctx.request?.body?.requests;
+
+        if (this.inProgress.setReq) {
+            ctx.response.status = 500;
+            ctx.response.body = 'Requests setting already in progress';
+            return;
+        }
+        this.inProgress.setReq = true;
+
+        const failValidation = (message) => {
+            delete this.inProgress.setReq;
+            ctx.throw(400, message);
+        };
+
+        if (!channel) {
+            return failValidation('missing channel');
+        }
+
+        if (!mbID) {
+            return failValidation('missing id');
+        }
+
+        if (!channel.match(/^#(.+)$/)) {
+            return failValidation('invalid channel');
+        }
+
+        const chan = this.channels[channel.toLowerCase()];
+
+        if (!chan) {
+            return failValidation('not in the channel');
+        }
+
+        if ((dj !== '') && (!chan.getUser(dj))) {
+            return failValidation('dj need to match a connected nickname ');
+        }
+
+        if (isNaN(requests)) {
+            return failValidation('not number');
+        }
+
+        this.dbCon.query('UPDATE magirc_mediabot_radio SET dj = ? , SET requests = ? WHERE id = ?', [dj, requests, mbID], function (error, results, fields) {
+            if (error) throw error;
+
+            chan.dj = dj;
+            chan.requests = requests;
+
+            console.log(chan);
+        });
+
+        ctx.response.body = ctx.request.body;
+        delete this.inProgress.setReq;
     }
 };
