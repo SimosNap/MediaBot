@@ -331,7 +331,7 @@ module.exports = class HttpAPI {
             if (error) throw error;
 
             chan.nowplay = nowplay;
-            if (chan.nowplay === 1) {
+            if (nowplay === 1) {
                 if (this.bot.modules['radio.js'].playjobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                     delete this.bot.modules['radio.js'].playjobs[chan.name];
@@ -365,7 +365,7 @@ module.exports = class HttpAPI {
         ctx.response.body = ctx.request.body;
         delete this.inProgress.nowPlay;
     }
-
+    
     async handleSetRadioReq(ctx) {
         const mbID = ctx.request?.body?.mbID;
         const channel = ctx.request?.body?.channel;

@@ -3,8 +3,13 @@ const utils = require('../misc/utils.js');
 
 module.exports = class radio {
     constructor(bot, config, channels, dbCon) {
+        
         const jobs = {};
+        this.jobs = jobs;
+        
         const playjobs = {};
+        this.playjobs = playjobs;
+        
 
         bot.on('join', async(event) => {
             if (event.nick.toLowerCase() === bot.user.nick.toLowerCase()) {
