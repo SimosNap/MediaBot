@@ -173,7 +173,7 @@ module.exports = class HttpAPI {
         }
 
         if (update === false) {
-            this.dbCon.query('INSERT INTO magirc_mediabot_radio (id, channel, name, description, source, icestats, logo, website, twitch, nowplay, announce, timer, dj, requests) values (?,?,?,?,?,?,?,?,?,0,0,30,\'\',0)', [mbID, channel, radioname, motd, source, icestats, logo, website, twitch], function (error, results, fields) => {
+            this.dbCon.query('INSERT INTO magirc_mediabot_radio (id, channel, name, description, source, icestats, logo, website, twitch, nowplay, announce, timer, dj, requests) values (?,?,?,?,?,?,?,?,?,0,0,30,\'\',0)', [mbID, channel, radioname, motd, source, icestats, logo, website, twitch], (error, results, fields) => {
                 if (error) throw error;
 
                 chan.radioname = radioname;
@@ -186,7 +186,7 @@ module.exports = class HttpAPI {
                 console.log(chan);
             });
         } else {
-            this.dbCon.query('UPDATE magirc_mediabot_radio SET name = ?, description = ?, source = ?, icestats = ?, logo = ?, website = ?, twitch = ? WHERE id = ?', [radioname, motd, source, icestats, logo, website, twitch, mbID], function (error, results, fields) => {
+            this.dbCon.query('UPDATE magirc_mediabot_radio SET name = ?, description = ?, source = ?, icestats = ?, logo = ?, website = ?, twitch = ? WHERE id = ?', [radioname, motd, source, icestats, logo, website, twitch, mbID], (error, results, fields) {
                 if (error) throw error;
 
                 chan.radioname = radioname;
@@ -257,7 +257,7 @@ module.exports = class HttpAPI {
             return failValidation('timer max interval 50 min');
         }
 
-        this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer], function (error, results, fields) => {
+        this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer], (error, results, fields) => {
             if (error) throw error;
 
             chan.announce = announce;
@@ -327,7 +327,7 @@ module.exports = class HttpAPI {
             return failValidation('not number');
         }
 
-        this.dbCon.query('UPDATE magirc_mediabot_radio SET nowplay = ? WHERE id = ?', [nowplay, mbID], function (error, results, fields) => {
+        this.dbCon.query('UPDATE magirc_mediabot_radio SET nowplay = ? WHERE id = ?', [nowplay, mbID], (error, results, fields) => {
             if (error) throw error;
 
             chan.nowplay = nowplay;
@@ -410,7 +410,7 @@ module.exports = class HttpAPI {
             return failValidation('not number');
         }
 
-        this.dbCon.query('UPDATE magirc_mediabot_radio SET dj = ? , SET requests = ? WHERE id = ?', [dj, requests, mbID], function (error, results, fields) => {
+        this.dbCon.query('UPDATE magirc_mediabot_radio SET dj = ? , SET requests = ? WHERE id = ?', [dj, requests, mbID], (error, results, fields) => {
             if (error) throw error;
 
             chan.dj = dj;
