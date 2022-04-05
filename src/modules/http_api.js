@@ -186,7 +186,7 @@ module.exports = class HttpAPI {
                 console.log(chan);
             });
         } else {
-            this.dbCon.query('UPDATE magirc_mediabot_radio SET name = ?, description = ?, source = ?, icestats = ?, logo = ?, website = ?, twitch = ? WHERE id = ?', [radioname, motd, source, icestats, logo, website, twitch, mbID], (error, results, fields) {
+            this.dbCon.query('UPDATE magirc_mediabot_radio SET name = ?, description = ?, source = ?, icestats = ?, logo = ?, website = ?, twitch = ? WHERE id = ?', [radioname, motd, source, icestats, logo, website, twitch, mbID], (error, results, fields) => {
                 if (error) throw error;
 
                 chan.radioname = radioname;
