@@ -365,7 +365,7 @@ module.exports = class HttpAPI {
         ctx.response.body = ctx.request.body;
         delete this.inProgress.nowPlay;
     }
-    
+
     async handleSetRadioReq(ctx) {
         const mbID = ctx.request?.body?.mbID;
         const channel = ctx.request?.body?.channel;
