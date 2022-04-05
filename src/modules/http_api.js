@@ -355,6 +355,7 @@ module.exports = class HttpAPI {
                 }, (60000 * 5));
                 this.bot.modules['radio.js'].playjobs[chan.name] = timeoutID;
             } else {
+                console.log(this.bot.modules['radio.js'].playjobs);
                 clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                 delete this.bot.modules['radio.js'].playjobs[chan.name];
             }
