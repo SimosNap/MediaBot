@@ -258,10 +258,11 @@ module.exports = class HttpAPI {
 
         this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer, mbID], (error, results, fields) => {
             if (error) throw error;
-            console.log('chan name: ',chan.name);
+            //console.log('chan name: ',chan.name);
+            console.log(typeof nowplay);
             chan.announce = announce;
             chan.timer = timer;
-            if (chan.announce === 1) {
+            if (chan.announce === '1') {
                 if (this.bot.modules['radio.js'].jobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
                     delete this.bot.modules['radio.js'].jobs[chan.name];
@@ -334,7 +335,7 @@ module.exports = class HttpAPI {
             console.log(nowplay);
             console.log(this.bot.modules['radio.js'].playjobs[chan.name] );
             console.log(typeof nowplay);
-            if (nowplay === 1) {
+            if (nowplay === '1') {
                 if (this.bot.modules['radio.js'].playjobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                     delete this.bot.modules['radio.js'].playjobs[chan.name];
