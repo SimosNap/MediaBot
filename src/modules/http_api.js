@@ -1,6 +1,7 @@
 const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const koaBody = require('koa-body');
+const fetch = require('node-fetch');
 
 const utils = require('../misc/utils.js');
 const Channel = require('../lib/channel');
