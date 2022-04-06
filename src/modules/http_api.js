@@ -404,7 +404,7 @@ module.exports = class HttpAPI {
             return failValidation('not in the channel');
         }
         
-        console.log('getUser', chan.getUser(dj));
+        const user = chan.getUser(dj); if (!user) { console.log('failed to get user', {dj}); return; }
         if (requests === 1) {
             if (!dj) {
                 return failValidation('dj must be set to enable requests');
