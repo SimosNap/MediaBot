@@ -414,7 +414,7 @@ module.exports = class HttpAPI {
                 return failValidation('dj must be set to enable requests');
             }
 
-            if (chan.getUser(dj).lenght === 0) {
+            if (chan.getUser(dj).length === 0) {
                 return failValidation('dj need to match a connected nickname ');
             }
         }
