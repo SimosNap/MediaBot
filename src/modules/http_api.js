@@ -405,7 +405,7 @@ module.exports = class HttpAPI {
             return failValidation('not in the channel');
         }
         console.log(dj);
-        if (!dj || dj == '') {
+        if (!dj || dj === null) {
             return failValidation('dj must be set to enable requests');
         }        
 
