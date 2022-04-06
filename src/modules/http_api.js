@@ -56,7 +56,6 @@ module.exports = class HttpAPI {
         }
 
         const chan = this.channels[newChan.toLowerCase()];
-        console.log(chan);
 
         if (chan) {
             return failValidation('channel already exist');
@@ -183,7 +182,6 @@ module.exports = class HttpAPI {
                 chan.logo = logo;
                 chan.website = website;
                 chan.twitch = twitch;
-                console.log(chan);
             });
         } else {
             this.dbCon.query('UPDATE magirc_mediabot_radio SET name = ?, description = ?, source = ?, icestats = ?, logo = ?, website = ?, twitch = ? WHERE id = ?', [radioname, motd, source, icestats, logo, website, twitch, mbID], (error, results, fields) => {
@@ -196,7 +194,6 @@ module.exports = class HttpAPI {
                 chan.logo = logo;
                 chan.website = website;
                 chan.twitch = twitch;
-                console.log(chan);
             });
         }
 
@@ -259,10 +256,9 @@ module.exports = class HttpAPI {
 
         this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer, mbID], (error, results, fields) => {
             if (error) throw error;
-            
+
             chan.announce = announce;
-            console.log(typeof chan.announce);
-            
+
             chan.timer = timer;
             if (chan.announce === '1') {
                 if (this.bot.modules['radio.js'].jobs[chan.name]) {
@@ -282,8 +278,6 @@ module.exports = class HttpAPI {
                 clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
                 delete this.bot.modules['radio.js'].jobs[chan.name];
             }
-
-            //console.log(chan);
         });
 
         ctx.response.body = ctx.request.body;
@@ -333,7 +327,7 @@ module.exports = class HttpAPI {
             if (error) throw error;
 
             chan.nowplay = nowplay;
-            console.log(typeof chan.nowplay);
+
             if (chan.nowplay === '1') {
                 if (this.bot.modules['radio.js'].playjobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
@@ -361,7 +355,6 @@ module.exports = class HttpAPI {
                 clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                 delete this.bot.modules['radio.js'].playjobs[chan.name];
             }
-
         });
 
         ctx.response.body = ctx.request.body;
@@ -403,13 +396,12 @@ module.exports = class HttpAPI {
         if (!chan) {
             return failValidation('not in the channel');
         }
-        
-        
+
         if (requests === '1') {
             if (!dj) {
                 return failValidation('dj must be set to enable requests');
-            }        
-    
+            }
+
             if (dj.length === 0) {
                 return failValidation('dj must be set to enable requests');
             }
@@ -418,7 +410,7 @@ module.exports = class HttpAPI {
                 return failValidation('dj need to match a connected nickname ');
             }
         }
-        
+
         if (isNaN(requests)) {
             return failValidation('not number');
         }
@@ -428,7 +420,6 @@ module.exports = class HttpAPI {
 
             chan.dj = dj;
             chan.requests = requests;
-
         });
 
         ctx.response.body = ctx.request.body;

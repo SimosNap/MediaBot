@@ -107,7 +107,7 @@ for (const file of moduleFiles) {
         console.error(`Failed to load module [${file}]:`, err.message);
     }
 }
-//bot.modules = modules;
+// bot.modules = modules;
 bot.connect(config.client);
 
 bot.on('registered', function () {
