@@ -259,8 +259,10 @@ module.exports = class HttpAPI {
         this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer, mbID], (error, results, fields) => {
             if (error) throw error;
             //console.log('chan name: ',chan.name);
-            console.log(typeof nowplay);
+            
             chan.announce = announce;
+            console.log(typeof chan.announce);
+            
             chan.timer = timer;
             if (chan.announce === '1') {
                 if (this.bot.modules['radio.js'].jobs[chan.name]) {
