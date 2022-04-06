@@ -126,7 +126,6 @@ module.exports = class HttpAPI {
             return failValidation('source need https');
         }
 
-        console.log(chan.source);
         if (!chan.source) {
             for (const channelObj of Object.values(this.channels)) {
                 if ((channelObj.source) && (channelObj.source.toLowerCase() === source.toLowerCase()) && (channelObj.name.toLowerCase() !== channel.toLowerCase())) {
@@ -295,7 +294,7 @@ module.exports = class HttpAPI {
 
         if (this.inProgress.nowPlay) {
             ctx.response.status = 500;
-            ctx.response.body = 'Advertise timer setting already in progress';
+            ctx.response.body = 'Nowplay setting already in progress';
             return;
         }
         this.inProgress.nowPlay = true;
@@ -331,6 +330,8 @@ module.exports = class HttpAPI {
             if (error) throw error;
 
             chan.nowplay = nowplay;
+            console.log(chan.name);
+            console.log(nowplay);
             if (nowplay === 1) {
                 if (this.bot.modules['radio.js'].playjobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
