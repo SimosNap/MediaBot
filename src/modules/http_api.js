@@ -333,6 +333,7 @@ module.exports = class HttpAPI {
             console.log(chan.name);
             console.log(nowplay);
             console.log(this.bot.modules['radio.js'].playjobs[chan.name] );
+            console.log(typeof nowplay);
             if (nowplay === 1) {
                 if (this.bot.modules['radio.js'].playjobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
