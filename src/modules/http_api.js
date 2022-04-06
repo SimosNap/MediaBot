@@ -259,7 +259,7 @@ module.exports = class HttpAPI {
 
         this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer, mbID], (error, results, fields) => {
             if (error) throw error;
-            console.log(chan.name);
+            console.log('chan name: ',chan.name);
             chan.announce = announce;
             chan.timer = timer;
             if (chan.announce === 1) {
