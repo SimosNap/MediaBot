@@ -405,7 +405,7 @@ module.exports = class HttpAPI {
         }
         
         
-        if (requests === 1) {
+        if (requests === '1') {
             if (!dj) {
                 return failValidation('dj must be set to enable requests');
             }        
