@@ -58,6 +58,6 @@ module.exports = class Channel extends IrcChannel {
     }
 
     getUser(nick) {
-        return this.users.find((u) => u.nick === nick);
+        return this.users.find((u) => this.irc_client.caseCompare(u.nick, nick));
     }
 };
