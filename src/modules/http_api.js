@@ -405,6 +405,8 @@ module.exports = class HttpAPI {
             return failValidation('not in the channel');
         }
         
+        console.log('getUser', chan.getUser(dj));
+        
         if (!dj) {
             return failValidation('dj must be set to enable requests');
         }        
@@ -416,7 +418,7 @@ module.exports = class HttpAPI {
         
         console.log(chan.getUser(dj));
 
-        if (chan.getUser(dj) !== true) {
+        if (!chan.getUser(dj)) {
             return failValidation('dj need to match a connected nickname ');
         }
         
