@@ -406,22 +406,19 @@ module.exports = class HttpAPI {
         }
         
         console.log('getUser', chan.getUser(dj));
-        
-        if (!dj) {
-            return failValidation('dj must be set to enable requests');
-        }        
+        if (requests === 1) {
+            if (!dj) {
+                return failValidation('dj must be set to enable requests');
+            }        
+    
+            if (dj.length === 0) {
+                return failValidation('dj must be set to enable requests');
+            }
 
-        if (dj.length === 0) {
-            return failValidation('dj must be set to enable requests');
+            if (!chan.getUser(dj)) {
+                return failValidation('dj need to match a connected nickname ');
+            }
         }
-        
-        
-        console.log(chan.getUser(dj));
-
-        if (!chan.getUser(dj)) {
-            return failValidation('dj need to match a connected nickname ');
-        }
-        
         
         if (isNaN(requests)) {
             return failValidation('not number');
