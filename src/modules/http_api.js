@@ -406,8 +406,7 @@ module.exports = class HttpAPI {
         }
         console.log(dj);
         
-        (!dj) === dj = undefined; dj = ''; dj = null;
-        if (!dj) {
+        if (!dj || dj === null || dj === '') {
             return failValidation('dj must be set to enable requests');
         }        
 
