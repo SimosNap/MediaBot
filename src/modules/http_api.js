@@ -202,7 +202,7 @@ module.exports = class HttpAPI {
 
         // ctx.body = `Request Body: ${JSON.stringify(ctx.request.body)}`;
         ctx.response.body = ctx.request.body;
-        delete this.inProgress.setAdv;
+        delete this.inProgress.setRadio;
     }
 
     async handleSetRadioAdv(ctx) {
@@ -285,7 +285,7 @@ module.exports = class HttpAPI {
         });
 
         ctx.response.body = ctx.request.body;
-        delete this.inProgress.setRadio;
+        delete this.inProgress.setAdv;
     }
 
     async handleSetRadioNp(ctx) {
