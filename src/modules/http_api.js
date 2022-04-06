@@ -257,7 +257,7 @@ module.exports = class HttpAPI {
             return failValidation('timer max interval 50 min');
         }
 
-        this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer], (error, results, fields) => {
+        this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer, mbID], (error, results, fields) => {
             if (error) throw error;
 
             chan.announce = announce;
