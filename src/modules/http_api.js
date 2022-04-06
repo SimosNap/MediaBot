@@ -299,6 +299,7 @@ module.exports = class HttpAPI {
         const failValidation = (message) => {
             delete this.inProgress.nowPlay;
             ctx.throw(400, message);
+            ctx.response.body = { error => message };
         };
 
         if (!channel) {
