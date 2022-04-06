@@ -355,6 +355,7 @@ module.exports = class HttpAPI {
                     this.bot.say(chan.name, '[ Adesso su ' + chan.radioname + ' ] ' + nowplaying + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_stream': tagData.join(';') });
                 }, (60000 * 5));
                 this.bot.modules['radio.js'].playjobs[chan.name] = timeoutID;
+                console.log(this.bot.modules['radio.js'].playjobs[chan.name] );
             } else {
                 clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                 delete this.bot.modules['radio.js'].playjobs[chan.name];
