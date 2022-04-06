@@ -281,7 +281,7 @@ module.exports = class HttpAPI {
                 delete this.bot.modules['radio.js'].jobs[chan.name];
             }
 
-            console.log(chan);
+            //console.log(chan);
         });
 
         ctx.response.body = ctx.request.body;
@@ -410,7 +410,7 @@ module.exports = class HttpAPI {
             return failValidation('not number');
         }
 
-        this.dbCon.query('UPDATE magirc_mediabot_radio SET dj = ? , SET requests = ? WHERE id = ?', [dj, requests, mbID], (error, results, fields) => {
+        this.dbCon.query('UPDATE magirc_mediabot_radio SET dj = ? , requests = ? WHERE id = ?', [dj, requests, mbID], (error, results, fields) => {
             if (error) throw error;
 
             chan.dj = dj;
