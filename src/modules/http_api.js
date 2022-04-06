@@ -404,13 +404,16 @@ module.exports = class HttpAPI {
         if (!chan) {
             return failValidation('not in the channel');
         }
-        console.log(dj);
         
-        if (!dj || dj === null || dj === '' || dj === undefined || dj === false) {
+        if (!dj) {
             return failValidation('dj must be set to enable requests');
         }        
 
-        if ((dj) && (!chan.getUser(dj))) {
+        if (dj.length === 0) {
+            return failValidation('dj must be set to enable requests');
+        }
+
+        if ((dj !== '') && (chan.getUser(dj) === false)) {
             return failValidation('dj need to match a connected nickname ');
         }
         
