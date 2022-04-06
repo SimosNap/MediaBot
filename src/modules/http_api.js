@@ -258,7 +258,6 @@ module.exports = class HttpAPI {
 
         this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer, mbID], (error, results, fields) => {
             if (error) throw error;
-            //console.log('chan name: ',chan.name);
             
             chan.announce = announce;
             console.log(typeof chan.announce);
@@ -333,11 +332,8 @@ module.exports = class HttpAPI {
             if (error) throw error;
 
             chan.nowplay = nowplay;
-            console.log(chan.name);
-            console.log(nowplay);
-            console.log(this.bot.modules['radio.js'].playjobs[chan.name] );
-            console.log(typeof nowplay);
-            if (nowplay === '1') {
+            console.log(typeof chan.nowplay);
+            if (chan.nowplay === '1') {
                 if (this.bot.modules['radio.js'].playjobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                     delete this.bot.modules['radio.js'].playjobs[chan.name];
@@ -359,9 +355,7 @@ module.exports = class HttpAPI {
                     ];
                     this.bot.say(chan.name, '[ Adesso su ' + chan.radioname + ' ] ' + nowplaying + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_stream': tagData.join(';') });
                 }, (60000 * 5));
-                console.log('timeout', timeoutID);
                 this.bot.modules['radio.js'].playjobs[chan.name] = timeoutID;
-                console.log('botmodules', this.bot.modules['radio.js'].playjobs[chan.name] );
             } else {
                 clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                 delete this.bot.modules['radio.js'].playjobs[chan.name];
