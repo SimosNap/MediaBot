@@ -362,7 +362,6 @@ module.exports = class HttpAPI {
                 delete this.bot.modules['radio.js'].playjobs[chan.name];
             }
 
-            //console.log(chan);
         });
 
         ctx.response.body = ctx.request.body;
@@ -415,7 +414,7 @@ module.exports = class HttpAPI {
                 return failValidation('dj must be set to enable requests');
             }
 
-            if (chan.getUser(dj) === undefined) {
+            if (chan.getUser(dj).lenght === 0) {
                 return failValidation('dj need to match a connected nickname ');
             }
         }
@@ -430,7 +429,6 @@ module.exports = class HttpAPI {
             chan.dj = dj;
             chan.requests = requests;
 
-            console.log(chan);
         });
 
         ctx.response.body = ctx.request.body;
