@@ -48,7 +48,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.chanJoin;
-            ctx.throw(400, message);
+            ctx.response.status = 500;
+            ctx.response.body = message;
         };
 
         if (!newChan) {
@@ -97,7 +98,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setRadio;
-            ctx.throw(400, message);
+            ctx.response.status = 500;
+            ctx.response.body = message;
         };
 
         if (!source) {
@@ -217,7 +219,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setAdv;
-            ctx.throw(400, message);
+            ctx.response.status = 500;
+            ctx.response.body = message;
         };
 
         if (!channel) {
@@ -298,8 +301,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.nowPlay;
-            ctx.throw(400, message);
-            ctx.response.body = { error : message };
+            ctx.response.status = 500;
+            ctx.response.body = message;
         };
 
         if (!channel) {
@@ -377,7 +380,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setReq;
-            ctx.throw(400, message);
+            ctx.response.status = 500;
+            ctx.response.body = message;
         };
 
         if (!channel) {
