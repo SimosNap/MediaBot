@@ -27,8 +27,9 @@ exports.joinChan = function (bot, newChan, dbCon) {
             const mbID = results.insertId;
             dbCon.query('INSERT INTO magirc_mediabot_youtube (id, channel, enabled) values (?,?,?)', [mbID, newChan.name, 1], function (error, results, fields) { if (error) { reject(error); } });
             dbCon.query('INSERT INTO magirc_mediabot_mixcloud (id, channel, enabled) values (?,?,?)', [mbID, newChan.name, 1], function (error, results, fields) { if (error) { reject(error); } });
-            const obj = { mbID: mbID, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 0, requests: 0, youtube: 1, mixcloud: 1 };
+            const obj = { mbID: mbID, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 10, requests: 0, youtube: 1, mixcloud: 1 };
             Object.assign(newChan, obj);
+            console.log('Channel:',obj);
         });
 
         removeListeners = () => {

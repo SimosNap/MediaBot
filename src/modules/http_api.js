@@ -48,8 +48,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.chanJoin;
-            ctx.response.status = 500;
-            ctx.response.body = message;
+            ctx.response.body = JSON.stringify({error: message});
+            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!newChan) {
@@ -98,8 +98,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setRadio;
-            ctx.response.status = 500;
-            ctx.response.body = message;
+            ctx.response.body = JSON.stringify({error: message});
+            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!source) {
@@ -219,8 +219,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setAdv;
-            ctx.response.status = 500;
-            ctx.response.body = message;
+            ctx.response.body = JSON.stringify({error: message});
+            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!channel) {
@@ -301,8 +301,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.nowPlay;
-            ctx.response.status = 500;
-            ctx.response.body = message;
+            ctx.response.body = JSON.stringify({error: message});
+            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!channel) {
@@ -380,8 +380,10 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setReq;
+            
             ctx.response.status = 500;
-            ctx.response.body = message;
+            ctx.response.body = JSON.stringify({error: message});
+            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!channel) {
