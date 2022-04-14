@@ -28,12 +28,14 @@ module.exports = class HttpAPI {
         this.api.post('/set/radio/advertise', this.handleSetRadioAdv.bind(this));
         this.api.post('/set/radio/nowplay', this.handleSetRadioNp.bind(this));
         this.api.post('/set/radio/requests', this.handleSetRadioReq.bind(this));
+        this.api.post('/set/youtube', this.handleSetYoutube.bind(this));
+        this.api.post('/set/mixcloud', this.handleSetMixcloud.bind(this));
 
         this.koa.use(this.api.routes());
         this.koa.use(this.api.allowedMethods());
 
-        // this.koa.listen(3000, '127.0.0.1');
-        this.koa.listen(3000);
+        this.koa.listen(3000, '127.0.0.1');
+        //this.koa.listen(3000);
     }
 
     async handleAddBot(ctx) {
@@ -48,8 +50,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.chanJoin;
-            ctx.response.body = JSON.stringify({error: message});
-            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!newChan) {
@@ -64,7 +66,7 @@ module.exports = class HttpAPI {
 
         try {
             const chan = new Channel(this.bot, newChan);
-            chan[chan.name] = chan;
+            this.channels[chan.name] = chan;
             const addedChan = await ircPromises.joinChan(this.bot, chan, this.dbCon);
             ctx.response.status = 200;
             ctx.response.body = { channel: addedChan };
@@ -98,8 +100,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setRadio;
-            ctx.response.body = JSON.stringify({error: message});
-            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!source) {
@@ -219,8 +221,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setAdv;
-            ctx.response.body = JSON.stringify({error: message});
-            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!channel) {
@@ -301,8 +303,8 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.nowPlay;
-            ctx.response.body = JSON.stringify({error: message});
-            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!channel) {
@@ -380,10 +382,10 @@ module.exports = class HttpAPI {
 
         const failValidation = (message) => {
             delete this.inProgress.setReq;
-            
+
             ctx.response.status = 500;
-            ctx.response.body = JSON.stringify({error: message});
-            //ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
         };
 
         if (!channel) {
@@ -431,5 +433,105 @@ module.exports = class HttpAPI {
 
         ctx.response.body = ctx.request.body;
         delete this.inProgress.setReq;
+    }
+
+    async handleSetYoutube(ctx) {
+        const mbID = ctx.request?.body?.mbID;
+        const channel = ctx.request?.body?.channel;
+        const enabled = ctx.request?.body?.enabled;
+
+        if (this.inProgress.youtube) {
+            ctx.response.status = 500;
+            ctx.response.body = 'Youtube setting already in progress';
+            return;
+        }
+        this.inProgress.youtube = true;
+
+        const failValidation = (message) => {
+            delete this.inProgress.youtube;
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+        };
+
+        if (!channel) {
+            return failValidation('missing channel');
+        }
+
+        if (!mbID) {
+            return failValidation('missing id');
+        }
+
+        if (!channel.match(/^#(.+)$/)) {
+            return failValidation('invalid channel');
+        }
+
+        const chan = this.channels[channel.toLowerCase()];
+
+        if (!chan) {
+            return failValidation('not in the channel');
+        }
+
+        if (isNaN(enabled)) {
+            return failValidation('not number');
+        }
+
+        this.dbCon.query('UPDATE magirc_mediabot_youtube SET enabled = ? WHERE id = ?', [enabled, mbID], (error, results, fields) => {
+            if (error) throw error;
+
+            chan.youtube = enabled;
+        });
+
+        ctx.response.body = ctx.request.body;
+        delete this.inProgress.youtube;
+    }
+
+    async handleSetMixcloud(ctx) {
+        const mbID = ctx.request?.body?.mbID;
+        const channel = ctx.request?.body?.channel;
+        const enabled = ctx.request?.body?.enabled;
+
+        if (this.inProgress.mixcloud) {
+            ctx.response.status = 500;
+            ctx.response.body = 'Mixcloud setting already in progress';
+            return;
+        }
+        this.inProgress.mixcloud = true;
+
+        const failValidation = (message) => {
+            delete this.inProgress.mixcloud;
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+        };
+
+        if (!channel) {
+            return failValidation('missing channel');
+        }
+
+        if (!mbID) {
+            return failValidation('missing id');
+        }
+
+        if (!channel.match(/^#(.+)$/)) {
+            return failValidation('invalid channel');
+        }
+
+        const chan = this.channels[channel.toLowerCase()];
+
+        if (!chan) {
+            return failValidation('not in the channel');
+        }
+        console.log(enabled);
+        if (isNaN(enabled)) {
+            return failValidation('not number');
+        }
+
+        this.dbCon.query('UPDATE magirc_mediabot_mixcloud SET enabled = ? WHERE id = ?', [enabled, mbID], (error, results, fields) => {
+            if (error) throw error;
+
+            chan.mixcloud = enabled;
+        });
+
+        ctx.response.body = ctx.request.body;
+        delete this.inProgress.mixcloud;
     }
 };
