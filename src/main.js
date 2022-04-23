@@ -22,7 +22,8 @@ const config = JSON.parse(rawdata);
 
 // Catch uncaught exceptions so the bot does not crash
 process.on('uncaughtException', function (err) {
-    console.error(err.stack);
+    // console.error(err.stack);
+    console.trace(err.stack);
 });
 
 const bot = new IRC.Client();
@@ -48,12 +49,15 @@ dbCon.query(`
         r.dj as dj, 
         r.requests as requests, 
         y.enabled as youtube, 
-        c.enabled as mixcloud 
+        c.enabled as mixcloud,
+        n.enabled as rss,
+        n.rss as subscriptions
     FROM magirc_mediabot_main AS m 
     LEFT JOIN magirc_mediabot_radio AS r 
         ON m.id = r.id LEFT JOIN magirc_mediabot_youtube as y 
         ON m.id = y.id LEFT JOIN magirc_mediabot_mixcloud as c 
-        ON m.id = c.id`,
+        ON m.id = c.id LEFT JOIN magirc_mediabot_rss as n
+        ON m.id = n.id`,
 (error, results, fields) => {
     if (error) throw error;
     for (const row of results) {
@@ -104,7 +108,7 @@ for (const file of moduleFiles) {
         const Module = require(path.join(modulesDir, file));
         modules[file] = new Module(bot, config, channels, dbCon);
     } catch (err) {
-        console.error(`Failed to load module [${file}]:`, err.message);
+        console.trace(`Failed to load module [${file}]:`, err.message);
     }
 }
 // bot.modules = modules;
@@ -116,7 +120,7 @@ bot.on('registered', function () {
     // add botcentral channel to the channels object with all modules disabled
     const chan = new Channel(bot, config.botcentral);
     channels[chan.name.toLowerCase()] = chan;
-    const obj = { mbID: 0, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 0, requests: 0, youtube: 0, mixcloud: 0 };
+    const obj = { mbID: 0, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 0, requests: 0, youtube: 0, mixcloud: 0, rss: 0, subscriptions: '' };
     Object.assign(chan, obj);
 
     // join botcentral and subscribed channels

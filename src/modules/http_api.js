@@ -35,7 +35,6 @@ module.exports = class HttpAPI {
         this.koa.use(this.api.allowedMethods());
 
         this.koa.listen(3000, '127.0.0.1');
-        //this.koa.listen(3000);
     }
 
     async handleAddBot(ctx) {
