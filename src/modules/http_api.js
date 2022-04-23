@@ -30,7 +30,8 @@ module.exports = class HttpAPI {
         this.api.post('/set/radio/requests', this.handleSetRadioReq.bind(this));
         this.api.post('/set/youtube', this.handleSetYoutube.bind(this));
         this.api.post('/set/mixcloud', this.handleSetMixcloud.bind(this));
-
+        this.api.post('/set/rss', this.handleSetRss.bind(this));
+        
         this.koa.use(this.api.routes());
         this.koa.use(this.api.allowedMethods());
 
@@ -533,4 +534,56 @@ module.exports = class HttpAPI {
         ctx.response.body = ctx.request.body;
         delete this.inProgress.mixcloud;
     }
+
+    async handleSetRss(ctx) {
+        const mbID = ctx.request?.body?.mbID;
+        const channel = ctx.request?.body?.channel;
+        const enabled = ctx.request?.body?.enabled;
+
+        if (this.inProgress.rss) {
+            ctx.response.status = 500;
+            ctx.response.body = 'RSS setting already in progress';
+            return;
+        }
+        this.inProgress.rss = true;
+
+        const failValidation = (message) => {
+            delete this.inProgress.rss;
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+        };
+
+        if (!channel) {
+            return failValidation('missing channel');
+        }
+
+        if (!mbID) {
+            return failValidation('missing id');
+        }
+
+        if (!channel.match(/^#(.+)$/)) {
+            return failValidation('invalid channel');
+        }
+
+        const chan = this.channels[channel.toLowerCase()];
+
+        if (!chan) {
+            return failValidation('not in the channel');
+        }
+        console.log(enabled);
+        if (isNaN(enabled)) {
+            return failValidation('not number');
+        }
+
+        this.dbCon.query('UPDATE magirc_mediabot_rss SET enabled = ? WHERE id = ?', [enabled, mbID], (error, results, fields) => {
+            if (error) throw error;
+
+            chan.rss = enabled;
+        });
+
+        ctx.response.body = ctx.request.body;
+        delete this.inProgress.rss;
+    }
+
+
 };
