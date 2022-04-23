@@ -2,9 +2,6 @@ const Parser = require('rss-parser');
 const cron = require('node-cron');
 const Yourls = require('node-yourls/yourls');
 
-const yourlsUrl = 'ilnk.news';
-const yourlsApi = '25d3bb966b';
-
 module.exports = class rssnews {
     shortenURL(url, title) {
         return new Promise((resolve, reject) => {
@@ -22,6 +19,10 @@ module.exports = class rssnews {
     }
 
     constructor(bot, config, channels, dbCon) {
+
+        const yourlsUrl = config.yourls_url;
+        const yourlsApi = config.yourls_api;
+
         this.shortener = new Yourls(yourlsUrl, yourlsApi);
 
         const parser = new Parser();
