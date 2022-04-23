@@ -2,6 +2,9 @@ const Parser = require('rss-parser');
 const cron = require('node-cron');
 const Yourls = require('node-yourls/yourls');
 
+const yourlsUrl = 'ilnk.news';
+const yourlsApi = '25d3bb966b';
+
 module.exports = class rssnews {
     shortenURL(url, title) {
         return new Promise((resolve, reject) => {
@@ -19,10 +22,6 @@ module.exports = class rssnews {
     }
 
     constructor(bot, config, channels, dbCon) {
-
-        const yourlsUrl = config.yourls_url;
-        const yourlsApi = config.yourls_api;
-
         this.shortener = new Yourls(yourlsUrl, yourlsApi);
 
         const parser = new Parser();
@@ -48,18 +47,21 @@ module.exports = class rssnews {
             (async() => {
                 for (const key in feeds) {
                     // console.log(`${key}: ${feeds[key].feed}`);
+                    try {
+                        const feed = await parser.parseURL(feeds[key].feed);
 
-                    const feed = await parser.parseURL(feeds[key].feed);
+                        if ((!feeds[key].last) || (feeds[key].last !== feed.items[0].link)) {
+                            const shortener = await this.shortenURL(feed.items[0].link, feeds[key].title);
 
-                    if ((!feeds[key].last) || (feeds[key].last !== feed.items[0].link)) {
-                        const shortener = await this.shortenURL(feed.items[0].link, feeds[key].title);
+                            feeds[key].title = feed.title;
+                            feeds[key].data = {};
 
-                        feeds[key].title = feed.title;
-                        feeds[key].data = {};
-
-                        Object.assign(feeds[key].data, feed.items[0]);
-                        feeds[key].last = feed.items[0].link;
-                        feeds[key].data.shorturl = shortener.shorturl;
+                            Object.assign(feeds[key].data, feed.items[0]);
+                            feeds[key].last = feed.items[0].link;
+                            feeds[key].data.shorturl = shortener.shorturl;
+                        }
+                    } catch (error) {
+                        return;
                     }
                 }
 

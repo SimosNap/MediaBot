@@ -31,6 +31,7 @@ module.exports = class HttpAPI {
         this.api.post('/set/youtube', this.handleSetYoutube.bind(this));
         this.api.post('/set/mixcloud', this.handleSetMixcloud.bind(this));
         this.api.post('/set/rss', this.handleSetRss.bind(this));
+        this.api.post('/select/feeds', this.handleSlectFeeds.bind(this));
         
         this.koa.use(this.api.routes());
         this.koa.use(this.api.allowedMethods());
@@ -570,7 +571,7 @@ module.exports = class HttpAPI {
         if (!chan) {
             return failValidation('not in the channel');
         }
-        console.log(enabled);
+
         if (isNaN(enabled)) {
             return failValidation('not number');
         }
@@ -585,5 +586,58 @@ module.exports = class HttpAPI {
         delete this.inProgress.rss;
     }
 
+    async handleSlectFeeds(ctx) {
+        const mbID = ctx.request?.body?.mbID;
+        const channel = ctx.request?.body?.channel;
+        const feeds = ctx.request?.body?.feed;
+
+        if (this.inProgress.feeds) {
+            ctx.response.status = 500;
+            ctx.response.body = 'Feed setting already in progress';
+            return;
+        }
+        this.inProgress.feed = true;
+
+        const failValidation = (message) => {
+            delete this.inProgress.feed;
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+        };
+
+        if (!channel) {
+            return failValidation('missing channel');
+        }
+
+        if (!mbID) {
+            return failValidation('missing id');
+        }
+
+        if (!channel.match(/^#(.+)$/)) {
+            return failValidation('invalid channel');
+        }
+
+        const chan = this.channels[channel.toLowerCase()];
+
+        if (!chan) {
+            return failValidation('not in the channel');
+        }
+        
+        let feedsVal = '';
+
+        if (!feeds) {
+             feedsVal = '';
+        } else {
+            feedsVal = (typeof feeds === 'string') ? feeds: feeds.join('|');
+        }
+
+        this.dbCon.query('UPDATE magirc_mediabot_rss SET rss = ? WHERE id = ?', [feedsVal, mbID], (error, results, fields) => {
+            if (error) throw error;
+
+            chan.subscriptions = feedsVal;
+        });
+
+        ctx.response.body = ctx.request.body;
+        delete this.inProgress.feed;
+    }
 
 };
