@@ -24,6 +24,7 @@ module.exports = class HttpAPI {
         });
 
         this.api.post('/add/bot', this.handleAddBot.bind(this));
+        this.api.post('/rem/bot', this.handleRemBot.bind(this));
         this.api.post('/set/radio', this.handleSetRadio.bind(this));
         this.api.post('/set/radio/advertise', this.handleSetRadioAdv.bind(this));
         this.api.post('/set/radio/nowplay', this.handleSetRadioNp.bind(this));
@@ -77,6 +78,45 @@ module.exports = class HttpAPI {
         }
 
         delete this.inProgress.chanJoin;
+    }
+
+    async handleRemBot(ctx) {
+        const remChan = ctx.request?.body?.channel;
+
+        if (this.inProgress.chanPart) {
+            ctx.response.status = 500;
+            ctx.response.body = 'channel remove already in progress';
+            return;
+        }
+        this.inProgress.chanPart = true;
+
+        const failValidation = (message) => {
+            delete this.inProgress.chanPart;
+            ctx.response.body = JSON.stringify({ error: message });
+            // ctx.throw(500, JSON.stringify({error: message}), { expose: true });
+        };
+
+        if (!remChan) {
+            return failValidation('channel required');
+        }
+
+        const chan = this.channels[remChan.toLowerCase()];
+
+        if (!chan) {
+            return failValidation('channel dont exist');
+        }
+
+        try {            
+            const removedChan = await ircPromises.partChan(this.bot, chan, this.dbCon);
+            delete this.channels[chan.name];
+            ctx.response.status = 200;
+            ctx.response.body = { channel: addedChan };
+        } catch (err) {
+            ctx.response.status = 500;
+            ctx.response.body = err;
+        }
+
+        delete this.inProgress.chanPart;
     }
 
     async handleSetRadio(ctx) {

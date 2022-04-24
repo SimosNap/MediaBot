@@ -50,3 +50,48 @@ exports.joinChan = function (bot, newChan, dbCon) {
         bot.join(newChan.name);
     });
 };
+
+exports.partChan = function (bot, remChan, dbCon) {
+    return new Promise((resolve, reject) => {
+        let removeListeners = null;
+        let timeoutID = 0;
+
+        const part = (event) => {
+            if (!bot.caseCompare(event.channel, remChan.name)) {
+                // does not match the channel
+                return;
+            }
+            if (!bot.caseCompare(event.nick, bot.user.nick)) {
+                // not not match the bot nick
+                return;
+            }
+            removeListeners();
+            resolve(event.channel);
+        };
+
+        const error = (event) => {
+            removeListeners();
+            reject(new Error(`channel failed to part: ${event.error}`));
+        };
+
+        dbCon.query('DELETE FROM magirc_mediabot_main WHERE name = ?', [remChan.name], function (error, results, fields) {
+            if (error) { reject(error); return; }
+        });
+
+        removeListeners = () => {
+            clearTimeout(timeoutID);
+            bot.off('part', part);
+            bot.off('error', error);
+        };
+
+        timeoutID = setTimeout(() => {
+            removeListeners();
+            reject(new Error('join timed out'));
+        }, 4000);
+
+        bot.on('part', part);
+        bot.on('error', error);
+
+        bot.part(remChan.name);
+    });
+};
