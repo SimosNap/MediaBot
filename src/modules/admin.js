@@ -27,10 +27,10 @@ module.exports = class admin {
                             const mbID = results.insertId;
                             dbCon.query('INSERT INTO magirc_mediabot_youtube (id, channel, enabled) values (?,?,?)', [mbID, channel, 1], function (error, results, fields) { if (error) throw error; });
                             dbCon.query('INSERT INTO magirc_mediabot_mixcloud (id, channel, enabled) values (?,?,?)', [mbID, channel, 1], function (error, results, fields) { if (error) throw error; });
-                            dbCon.query('INSERT INTO magirc_mediabot_rss (id, channel, enabled,rss) values (?,?,?,?)', [mbID, channel, 1, 'https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml'], function (error, results, fields) { if (error) throw error; });
+                            dbCon.query('INSERT INTO magirc_mediabot_rss (id, channel, enabled,rss) values (?,?,?,?)', [mbID, channel, 0, ''], function (error, results, fields) { if (error) throw error; });
                             const chan = new Channel(bot, channel);
                             channels[channel.toLowerCase()] = chan;
-                            const obj = { mbID: mbID, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 10, requests: 0, youtube: 1, mixcloud: 1, rss: 1, subscriptions: 'https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml' };
+                            const obj = { mbID: mbID, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 10, requests: 0, youtube: 1, mixcloud: 1, rss: 0, subscriptions: '' };
                             Object.assign(chan, obj);
                             bot.join(channel);
                             bot.notice(event.nick, `Hai aggiunto ${bot.user.nick} al canale ${channel}`);
