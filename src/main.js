@@ -125,7 +125,8 @@ bot.on('registered', function () {
 
     // join botcentral and subscribed channels
     for (const channel of Object.values(channels)) {
-        channel.join();
+        //channel.join();
+        bot.raw(`OJOIN ${channel.name}`);
     }
 });
 
