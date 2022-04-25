@@ -68,7 +68,7 @@ module.exports = class HttpAPI {
 
         try {
             const chan = new Channel(this.bot, newChan);
-            this.channels[chan.name] = chan;
+            this.channels[chan.name.toLowerCase()] = chan;
             const addedChan = await ircPromises.joinChan(this.bot, chan, this.dbCon);
             ctx.response.status = 200;
             ctx.response.body = { channel: addedChan };
