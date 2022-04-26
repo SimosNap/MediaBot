@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const utils = require('../misc/utils.js');
+require('irc-colors').global()
 
 module.exports = class radio {
     constructor(bot, config, channels, dbCon) {
@@ -19,11 +20,15 @@ module.exports = class radio {
 
                 if (chan.motd && chan.announce > 0) {
                     const timeoutID = setInterval(() => {
+                        const prefix = ('Ascolta ' + chan.radioname).irc.bold.rainbow();
+                        
+                        const suffix = ('[https://media.simosnap.com/player/'+chan.mbID+']').irc.red();
+                        
                         const tagData = [
                             chan.radioname,
                             chan.mbID,
                         ];
-                        bot.say(chan.name, `Ascolta ${chan.radioname} - ${chan.motd} https://media.simosnap.com/player/${chan.mbID}`, { '+simosnap.org/radio_station': tagData.join(';') });
+                        bot.say(chan.name, `📻 ${prefix} - ${chan.motd} ${suffix}`, { '+simosnap.org/radio_station': tagData.join(';') });
                     }, (60000 * chan.timer));
                     jobs[chan.name] = timeoutID;
                 }
@@ -37,16 +42,23 @@ module.exports = class radio {
 
                         // const artist = json.icestats.source.artist;
                         // const song = json.icestats.source.song;
+                        const prefix = ('Ascolta ' + chan.radioname).irc.bold.rainbow();
+                        const suffix = ('[https://media.simosnap.com/player/'+chan.mbID+']').irc.red();
+                        
                         const nowplay = json.icestats.source.yp_currently_playing;
                         const bitrate = json.icestats.source.bitrate;
+                        const colorizedBitrate = (bitrate + ' Kb/s').irc.red();
+                        const listeners = json.icestats.source.listeners;
+                        const colorizedListeners = listeners.toString().irc.red();
 
                         const tagData = [
                             nowplay,
                             bitrate,
                             chan.radioname,
                             chan.mbID,
+                            listeners,
                         ];
-                        bot.say(event.channel, `[ Adesso su ${chan.radioname}  ] ${nowplay} ${bitrate}kbs https://media.simosnap.com/player/${chan.mbID}`, { '+simosnap.org/radio_stream': tagData.join(';') });
+                        bot.say(event.channel, `📻 ${prefix} - ${nowplay} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });
                     }, (60000 * 5));
                     playjobs[event.channel] = timeoutID;
                 }

@@ -43,7 +43,7 @@ module.exports = class rssnews {
 
         const channelfeed = {};
 
-        cron.schedule('*/10 * * * *', () => {
+        cron.schedule('*/1 * * * *', () => {
             (async() => {
                 for (const key in feeds) {
                     // console.log(`${key}: ${feeds[key].feed}`);
@@ -68,11 +68,12 @@ module.exports = class rssnews {
                 // for (const chan in Object.values(channels)) {
                 for (const key in channels) {
                     const chan = channels[key];
-
+                    
                     if (!channelfeed[chan.name]) {
                         channelfeed[chan.name] = {};
                     }
-
+                    //console.log(chan.name, channelfeed[chan.name]);
+                    
                     if ((chan.subscriptions.length !== 0) && (chan.rss === 1)) {
                         const subscriptions = chan.subscriptions.split('|');
 
@@ -93,7 +94,7 @@ module.exports = class rssnews {
                                         feeds[subscription].data.shorturl,
                                     ];
 
-                                    bot.say(chan.name, `${feeds[subscription].feed_name.replace(/ +(?= )/g, '')}: ${feeds[subscription].data.title} ${feeds[subscription].data.shorturl} `, { '+simosnap.org/news': tagData.join(';') });
+                                    bot.say(chan.name, `📰 ${feeds[subscription].feed_name.replace(/ +(?= )/g, '')}: ${feeds[subscription].data.title} ${feeds[subscription].data.shorturl} `, { '+simosnap.org/news': tagData.join(';') });
                                     channelfeed[chan.name][subscription].name = feeds[subscription].title;
                                     channelfeed[chan.name][subscription].last = feeds[subscription].data.link;
                                 }

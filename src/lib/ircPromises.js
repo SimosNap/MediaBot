@@ -30,7 +30,6 @@ exports.joinChan = function (bot, newChan, dbCon) {
             dbCon.query('INSERT INTO magirc_mediabot_rss (id, channel, enabled,rss) values (?,?,?,?)', [mbID, newChan.name, 0, ''], function (error, results, fields) { if (error) throw error; });
             const obj = { mbID: mbID, radioname: '', motd: '', source: '', icestats: '', logo: '', website: '', twitch: '', nowplay: 0, announce: 0, timer: 10, requests: 0, youtube: 1, mixcloud: 1, rss: 0, subscriptions: '' };
             Object.assign(newChan, obj);
-            console.log('Channel:', newChan);
         });
 
         removeListeners = () => {

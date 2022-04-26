@@ -923,6 +923,11 @@ ip@^1.1.5:
   resolved "https://registry.yarnpkg.com/ip/-/ip-1.1.5.tgz#bdded70114290828c0a039e72ef25f5aaec4354a"
   integrity sha1-vd7XARQpCCjAoDnnLvJfWq7ENUo=
 
+irc-colors@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/irc-colors/-/irc-colors-1.5.0.tgz#08834c01ead88b0fd88386a5f2af8f2b0bb963fb"
+  integrity sha512-HtszKchBQTcqw1DC09uD7i7vvMayHGM1OCo6AHt5pkgZEyo99ClhHTMJdf+Ezc9ovuNNxcH89QfyclGthjZJOw==
+
 irc-framework@^4.12.1:
   version "4.12.1"
   resolved "https://registry.yarnpkg.com/irc-framework/-/irc-framework-4.12.1.tgz#d622178b47ec1ebf8c7bd1de90a848bb38d82103"

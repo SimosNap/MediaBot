@@ -303,10 +303,10 @@ module.exports = class HttpAPI {
         this.dbCon.query('UPDATE magirc_mediabot_radio SET announce = ?, timer = ? WHERE id = ?', [announce, timer, mbID], (error, results, fields) => {
             if (error) throw error;
 
-            chan.announce = announce;
+            chan.announce = parseInt(announce);
 
             chan.timer = timer;
-            if (chan.announce === '1') {
+            if (chan.announce === 1) {
                 if (this.bot.modules['radio.js'].jobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
                     delete this.bot.modules['radio.js'].jobs[chan.name];
@@ -373,9 +373,9 @@ module.exports = class HttpAPI {
         this.dbCon.query('UPDATE magirc_mediabot_radio SET nowplay = ? WHERE id = ?', [nowplay, mbID], (error, results, fields) => {
             if (error) throw error;
 
-            chan.nowplay = nowplay;
+            chan.nowplay = parseInt(nowplay);
 
-            if (chan.nowplay === '1') {
+            if (chan.nowplay === 1) {
                 if (this.bot.modules['radio.js'].playjobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
                     delete this.bot.modules['radio.js'].playjobs[chan.name];
@@ -469,7 +469,7 @@ module.exports = class HttpAPI {
             if (error) throw error;
 
             chan.dj = dj;
-            chan.requests = requests;
+            chan.requests = parseInt(requests);
         });
 
         ctx.response.body = ctx.request.body;
@@ -519,7 +519,7 @@ module.exports = class HttpAPI {
         this.dbCon.query('UPDATE magirc_mediabot_youtube SET enabled = ? WHERE id = ?', [enabled, mbID], (error, results, fields) => {
             if (error) throw error;
 
-            chan.youtube = enabled;
+            chan.youtube = parseInt(enabled);
         });
 
         ctx.response.body = ctx.request.body;
@@ -561,7 +561,7 @@ module.exports = class HttpAPI {
         if (!chan) {
             return failValidation('not in the channel');
         }
-        console.log(enabled);
+
         if (isNaN(enabled)) {
             return failValidation('not number');
         }
@@ -569,7 +569,7 @@ module.exports = class HttpAPI {
         this.dbCon.query('UPDATE magirc_mediabot_mixcloud SET enabled = ? WHERE id = ?', [enabled, mbID], (error, results, fields) => {
             if (error) throw error;
 
-            chan.mixcloud = enabled;
+            chan.mixcloud = parseInt(enabled);
         });
 
         ctx.response.body = ctx.request.body;
@@ -619,7 +619,8 @@ module.exports = class HttpAPI {
         this.dbCon.query('UPDATE magirc_mediabot_rss SET enabled = ? WHERE id = ?', [enabled, mbID], (error, results, fields) => {
             if (error) throw error;
 
-            chan.rss = enabled;
+            chan.rss = parseInt(enabled);
+
         });
 
         ctx.response.body = ctx.request.body;
@@ -674,6 +675,7 @@ module.exports = class HttpAPI {
             if (error) throw error;
 
             chan.subscriptions = feedsVal;
+
         });
 
         ctx.response.body = ctx.request.body;
