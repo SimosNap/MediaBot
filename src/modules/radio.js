@@ -1,9 +1,32 @@
 const fetch = require('node-fetch');
 const utils = require('../misc/utils.js');
-require('irc-colors').global()
+const Yourls = require('node-yourls/yourls');
+require('irc-colors').global();
 
 module.exports = class radio {
+
+    shortenURL(url, title) {
+        return new Promise((resolve, reject) => {
+            this.shortener.shorten(
+                url,
+                title,
+                (error, result) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    return resolve(result);
+                },
+            );
+        });
+    }
+
     constructor(bot, config, channels, dbCon) {
+        
+        const yourlsUrl = config.yourls_url;
+        const yourlsApi = config.yourls_api;
+
+        this.shortener = new Yourls(yourlsUrl, yourlsApi);
+        
         const jobs = {};
         this.jobs = jobs;
 
@@ -17,18 +40,18 @@ module.exports = class radio {
                 if (!chan.source) {
                     return;
                 }
-
+                const shortener = await this.shortenURL('https://media.simosnap.com/player/'+chan.mbID , 'Media Player ' + chan.radioname);
+                
                 if (chan.motd && chan.announce > 0) {
                     const timeoutID = setInterval(() => {
-                        const prefix = ('Ascolta ' + chan.radioname).irc.bold.rainbow();
-                        
-                        const suffix = ('[https://media.simosnap.com/player/'+chan.mbID+']').irc.red();
+                        const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
+                        const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
                         
                         const tagData = [
                             chan.radioname,
                             chan.mbID,
                         ];
-                        bot.say(chan.name, `📻 ${prefix} - ${chan.motd} ${suffix}`, { '+simosnap.org/radio_station': tagData.join(';') });
+                        bot.say(chan.name, `🎛 ${prefix} - ${chan.motd} ${suffix}`, { '+simosnap.org/radio_station': tagData.join(';') });
                     }, (60000 * chan.timer));
                     jobs[chan.name] = timeoutID;
                 }
@@ -42,8 +65,8 @@ module.exports = class radio {
 
                         // const artist = json.icestats.source.artist;
                         // const song = json.icestats.source.song;
-                        const prefix = ('Ascolta ' + chan.radioname).irc.bold.rainbow();
-                        const suffix = ('[https://media.simosnap.com/player/'+chan.mbID+']').irc.red();
+                        const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
+                        const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
                         
                         const nowplay = json.icestats.source.yp_currently_playing;
                         const bitrate = json.icestats.source.bitrate;
@@ -58,7 +81,7 @@ module.exports = class radio {
                             chan.mbID,
                             listeners,
                         ];
-                        bot.say(event.channel, `📻 ${prefix} - ${nowplay} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });
+                        bot.say(event.channel, `🎛 ${prefix} - ${nowplay} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });
                     }, (60000 * 5));
                     playjobs[event.channel] = timeoutID;
                 }

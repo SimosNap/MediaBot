@@ -1,7 +1,31 @@
 const mixcloudfetch = require('../misc/mixcloud.js');
+const Yourls = require('node-yourls/yourls');
+require('irc-colors').global()
 
 module.exports = class mixcloud {
+
+    shortenURL(url, title) {
+        return new Promise((resolve, reject) => {
+            this.shortener.shorten(
+                url,
+                title,
+                (error, result) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    return resolve(result);
+                },
+            );
+        });
+    }
+
     constructor(bot, config, channels, dbCon) {
+
+        const yourlsUrl = config.yourls_url;
+        const yourlsApi = config.yourls_api;
+        
+        this.shortener = new Yourls(yourlsUrl, yourlsApi);
+                
         this.mixcloudRegex = /^(?:(?:https?:)?\/\/)?(?:(?:www\.mixcloud\.com))\/(?<mixID>([\w-]+)\/([\w-]+)(?:(?:\/?)))?$/;
 
         bot.on('message', async(event) => {
@@ -32,7 +56,10 @@ module.exports = class mixcloud {
             }
 
             const mediUrl = new URL('https://www.simosnap.org/channel/' + encodeURIComponent(event.target) + '/profile#mediabot');
-
+            const shortener = await this.shortenURL(mediUrl.href, 'MediaBot Timeline del canale' + event.target);
+            
+            const prefix = 'MixCloud'.irc.bold.purple();
+            const suffix = ('[MediaBot Timeline - https://ilnk.page/' + shortener.url.keyword + ']').irc.teal();
             const tagData = [
                 match.groups.mixID,
                 info.audio_length,
@@ -40,7 +67,7 @@ module.exports = class mixcloud {
                 info.pictures.medium,
             ];
 
-            bot.say(event.target, `[MixCloud] *** ${info.name} [*] ${info.user.name} *** [ MediaBot Timeline - ${mediUrl}]`, { '+simosnap.org/mixcloud': tagData.join(';') });
+            bot.say(event.target, `🎧 ${prefix} *** ${info.name} [*] ${info.user.name} *** ${suffix}`, { '+simosnap.org/mixcloud': tagData.join(';') });
 
             /* if (!event.tags.account) {
                 return;

@@ -1,11 +1,10 @@
 const Parser = require('rss-parser');
 const cron = require('node-cron');
 const Yourls = require('node-yourls/yourls');
-
-const yourlsUrl = 'ilnk.news';
-const yourlsApi = '25d3bb966b';
+require('irc-colors').global();
 
 module.exports = class rssnews {
+    
     shortenURL(url, title) {
         return new Promise((resolve, reject) => {
             this.shortener.shorten(
@@ -22,6 +21,10 @@ module.exports = class rssnews {
     }
 
     constructor(bot, config, channels, dbCon) {
+
+        const yourlsUrl = config.yourls_url;
+        const yourlsApi = config.yourls_api;
+
         this.shortener = new Yourls(yourlsUrl, yourlsApi);
 
         const parser = new Parser();
@@ -87,6 +90,7 @@ module.exports = class rssnews {
                                     // console.log('last:', channelfeed[chan.name][subscription].last);
 
                                 } else {
+                                    const suffix = ('['+feeds[subscription].data.shorturl+']').irc.teal();
                                     const tagData = [
                                         feeds[subscription].title.replace(/ +(?= )/g, ''),
                                         feeds[subscription].tag,
@@ -94,7 +98,7 @@ module.exports = class rssnews {
                                         feeds[subscription].data.shorturl,
                                     ];
 
-                                    bot.say(chan.name, `📰 ${feeds[subscription].feed_name.replace(/ +(?= )/g, '')}: ${feeds[subscription].data.title} ${feeds[subscription].data.shorturl} `, { '+simosnap.org/news': tagData.join(';') });
+                                    bot.say(chan.name, `📰 ${feeds[subscription].feed_name.replace(/ +(?= )/g, '').irc.teal.bold()}: ${feeds[subscription].data.title} ${suffix}`, { '+simosnap.org/news': tagData.join(';') });
                                     channelfeed[chan.name][subscription].name = feeds[subscription].title;
                                     channelfeed[chan.name][subscription].last = feeds[subscription].data.link;
                                 }

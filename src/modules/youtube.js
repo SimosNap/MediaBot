@@ -1,7 +1,31 @@
 const tubefetch = require('../misc/youtube.js');
+const Yourls = require('node-yourls/yourls');
+require('irc-colors').global()
 
 module.exports = class youtube {
+
+    shortenURL(url, title) {
+        return new Promise((resolve, reject) => {
+            this.shortener.shorten(
+                url,
+                title,
+                (error, result) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    return resolve(result);
+                },
+            );
+        });
+    }
+
     constructor(bot, config, channels, dbCon) {
+
+        const yourlsUrl = config.yourls_url;
+        const yourlsApi = config.yourls_api;
+
+        this.shortener = new Yourls(yourlsUrl, yourlsApi);
+
         this.youtubeRegex = /((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|v\/)?)(?<ytID>[\w-]+)(\S+)?/i;
 
         bot.on('message', async(event) => {
@@ -32,6 +56,12 @@ module.exports = class youtube {
 
             const mediUrl = new URL('https://www.simosnap.org/channel/' + encodeURIComponent(event.target) + '/profile#mediabot');
 
+            const shortener = await this.shortenURL(mediUrl.href, 'MediaBot Timeline del canale' + event.target);
+            
+            console.log(shortener.url.keyword);
+            
+            const prefix = 'YouTube'.irc.bold.red();
+            const suffix = ('[MediaBot Timeline - https://ilnk.page/' + shortener.url.keyword + ']').irc.teal();
             const tagData = [
                 match.groups.ytID,
                 info.contentDetails.duration,
@@ -40,7 +70,7 @@ module.exports = class youtube {
                 event.nick,
             ];
 
-            bot.say(event.target, `[Titolo] *** ${info.snippet.title} *** [ MediaBot Timeline - ${mediUrl}]`, { '+simosnap.org/youtube': tagData.join(';') });
+            bot.say(event.target, `🎬 ${prefix} *** ${info.snippet.title} *** ${suffix}`, { '+simosnap.org/youtube': tagData.join(';') });
 
             if (!event.tags.account) {
                 return;
