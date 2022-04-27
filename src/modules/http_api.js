@@ -436,7 +436,7 @@ module.exports = class HttpAPI {
                     
 
                     const tagData = [
-                        nowplay,
+                        nowplaying,
                         bitrate,
                         chan.radioname,
                         chan.mbID,
