@@ -351,7 +351,6 @@ module.exports = class HttpAPI {
                     ];
                     this.bot.say(chan.name, `🎛 ${prefix} - ${chan.motd} ${suffix}`, { '+simosnap.org/radio_station': tagData.join(';') });
                     
-                    //this.bot.say(chan.name, 'Ascolta ' + chan.radioname + ' - ' + chan.motd + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_station': tagData.join(';') });
                 }, (60000 * chan.timer));
                 this.bot.modules['radio.js'].jobs[chan.name] = timeoutID;
             } else {
