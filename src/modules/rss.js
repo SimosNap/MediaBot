@@ -55,13 +55,15 @@ module.exports = class rssnews {
 
                         if ((!feeds[key].last) || (feeds[key].last !== feed.items[0].link)) {
                             const shortener = await this.shortenURL(feed.items[0].link, feeds[key].title);
+                            
+                            console.log(shortener);
 
                             feeds[key].title = feed.title;
                             feeds[key].data = {};
 
                             Object.assign(feeds[key].data, feed.items[0]);
                             feeds[key].last = feed.items[0].link;
-                            feeds[key].data.shorturl = shortener.shorturl;
+                            feeds[key].data.shorturl =  'https://ilnk.news/' + shortener.url.keyword;
                         }
                     } catch (error) {
                         return;
