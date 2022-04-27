@@ -46,7 +46,7 @@ module.exports = class mixcloud {
             const match = event.message.match(this.mixcloudRegex);
 
             if (!match || !match.groups.mixID) {
-                console.log('returning from match');
+                //console.log('returning from match');
                 return;
             }
 

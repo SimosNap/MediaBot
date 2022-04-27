@@ -474,7 +474,7 @@ module.exports = class HttpAPI {
                     }
 
                         
-                    const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
+                    const prefix = ('Adesso su ' + chan.radioname).irc.teal.bold();
                     const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
 
                     const artist = json.icestats.source.artist;

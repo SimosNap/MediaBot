@@ -45,7 +45,7 @@ module.exports = class youtube {
 
             const match = event.message.match(this.youtubeRegex);
             if (!match || !match.groups.ytID) {
-                console.log('returning from match');
+                //console.log('returning from match');
                 return;
             }
 
@@ -57,8 +57,6 @@ module.exports = class youtube {
             const mediUrl = new URL('https://www.simosnap.org/channel/' + encodeURIComponent(event.target) + '/profile#mediabot');
 
             const shortener = await this.shortenURL(mediUrl.href, 'MediaBot Timeline del canale' + event.target);
-            
-            console.log(shortener.url.keyword);
             
             const prefix = 'YouTube'.irc.bold.red();
             const suffix = ('[MediaBot Timeline - https://ilnk.page/' + shortener.url.keyword + ']').irc.teal();
