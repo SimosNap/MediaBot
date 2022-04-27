@@ -78,9 +78,9 @@ module.exports = class radio {
 
                         const tagData = [
                             nowplay,
+                            bitrate,
                             chan.radioname,
                             chan.mbID,
-                            bitrate,
                             listeners,
                         ];
                         bot.say(event.channel, `🎛 ${prefix} - ${nowplay} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });
