@@ -436,9 +436,10 @@ module.exports = class HttpAPI {
                     
 
                     const tagData = [
-                        artist,
-                        song,
+                        nowplay,
                         bitrate,
+                        chan.radioname,
+                        chan.mbID,
                         listeners,
                     ];
                     this.bot.say(chan.name, `🎛 ${prefix} - ${nowplaying} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });

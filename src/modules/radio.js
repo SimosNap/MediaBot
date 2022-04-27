@@ -77,8 +77,9 @@ module.exports = class radio {
                         const colorizedListeners = listeners.toString().irc.red();
 
                         const tagData = [
-                            artist,
-                            song,
+                            nowplay,
+                            chan.radioname,
+                            chan.mbID,
                             bitrate,
                             listeners,
                         ];
