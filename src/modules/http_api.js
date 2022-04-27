@@ -232,6 +232,8 @@ module.exports = class HttpAPI {
         if (!utils.isValidSecureURL(logo)) {
             return failValidation('logo need https');
         }
+        
+        const shortener = await this.shortenURL('https://media.simosnap.com/player/'+chan.mbID , 'Media Player ' + radioname);
 
         if ((website) && (!utils.isValidURL(website))) {
             return failValidation('not valid URL');
@@ -252,6 +254,30 @@ module.exports = class HttpAPI {
                 chan.logo = logo;
                 chan.website = website;
                 chan.twitch = twitch;
+
+                if (chan.announce === 1) {
+                    if (this.bot.modules['radio.js'].jobs[chan.name]) {
+                        clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
+                        delete this.bot.modules['radio.js'].jobs[chan.name];
+                    }
+    
+                    const timeoutID = setInterval(() => {
+                        const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
+                        const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
+                            
+                        const tagData = [
+                            chan.radioname,
+                            chan.mbID,
+                        ];
+                        this.bot.say(chan.name, `🎛 ${prefix} - ${chan.motd} ${suffix}`, { '+simosnap.org/radio_station': tagData.join(';') });
+                        
+                    }, (60000 * chan.timer));
+                    this.bot.modules['radio.js'].jobs[chan.name] = timeoutID;
+                } else {
+                    clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
+                    delete this.bot.modules['radio.js'].jobs[chan.name];
+                }
+
             });
         } else {
             this.dbCon.query('UPDATE magirc_mediabot_radio SET name = ?, description = ?, source = ?, icestats = ?, logo = ?, website = ?, twitch = ? WHERE id = ?', [radioname, motd, source, icestats, logo, website, twitch, mbID], (error, results, fields) => {
@@ -264,6 +290,31 @@ module.exports = class HttpAPI {
                 chan.logo = logo;
                 chan.website = website;
                 chan.twitch = twitch;
+                
+                if (chan.announce === 1) {
+                    if (this.bot.modules['radio.js'].jobs[chan.name]) {
+                        clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
+                        delete this.bot.modules['radio.js'].jobs[chan.name];
+                    }
+    
+                    const timeoutID = setInterval(() => {
+                        const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
+                        const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
+                            
+                        const tagData = [
+                            chan.radioname,
+                            chan.mbID,
+                        ];
+                        this.bot.say(chan.name, `🎛 ${prefix} - ${chan.motd} ${suffix}`, { '+simosnap.org/radio_station': tagData.join(';') });
+                        
+                    }, (60000 * chan.timer));
+                    this.bot.modules['radio.js'].jobs[chan.name] = timeoutID;
+                } else {
+                    clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
+                    delete this.bot.modules['radio.js'].jobs[chan.name];
+                }
+
+                
             });
         }
 
