@@ -82,7 +82,7 @@ module.exports = class radio {
                             listeners,
                         ];
                         bot.say(event.channel, `🎛 ${prefix} - ${nowplay} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });
-                    }, (60000 * 5));
+                    }, (60000 * 6));
                     playjobs[event.channel] = timeoutID;
                 }
             }
