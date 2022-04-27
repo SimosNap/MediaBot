@@ -317,8 +317,8 @@ module.exports = class HttpAPI {
                 
             });
         }
-
-        // ctx.body = `Request Body: ${JSON.stringify(ctx.request.body)}`;
+        
+        bot.tagmsg(chan.name, { '+simosnap.org/radio_update': 1 });
         ctx.response.body = ctx.request.body;
         delete this.inProgress.setRadio;
     }
@@ -409,7 +409,8 @@ module.exports = class HttpAPI {
                 delete this.bot.modules['radio.js'].jobs[chan.name];
             }
         });
-
+        
+        bot.tagmsg(chan.name, { '+simosnap.org/radio_update': 1 });
         ctx.response.body = ctx.request.body;
         delete this.inProgress.setAdv;
     }
@@ -502,7 +503,8 @@ module.exports = class HttpAPI {
                 delete this.bot.modules['radio.js'].playjobs[chan.name];
             }
         });
-
+        
+        bot.tagmsg(chan.name, { '+simosnap.org/radio_update': 1 });
         ctx.response.body = ctx.request.body;
         delete this.inProgress.nowPlay;
     }
@@ -570,7 +572,8 @@ module.exports = class HttpAPI {
             chan.dj = dj;
             chan.requests = parseInt(requests);
         });
-
+        
+        bot.tagmsg(chan.name, { '+simosnap.org/radio_update': 1 });
         ctx.response.body = ctx.request.body;
         delete this.inProgress.setReq;
     }

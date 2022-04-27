@@ -301,6 +301,7 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.requests = 1;
                     bot.notice(event.nick, 'Hai abilitato la ricezione di richieste musicali');
+                    bot.tagmsg(event.replyTarget, { '+simosnap.org/radio_update': '1' });
                 });
                 break;
             }
