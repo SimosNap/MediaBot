@@ -1,6 +1,6 @@
 const tubefetch = require('../misc/youtube.js');
 const Yourls = require('node-yourls/yourls');
-require('irc-colors').global()
+require('irc-colors').global();
 
 module.exports = class youtube {
 

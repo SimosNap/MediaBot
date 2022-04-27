@@ -67,7 +67,9 @@ module.exports = class radio {
                         // const song = json.icestats.source.song;
                         const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
                         const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
-                        
+
+                        const artist = json.icestats.source.artist;
+                        const song = json.icestats.source.artist;                        
                         const nowplay = json.icestats.source.yp_currently_playing;
                         const bitrate = json.icestats.source.bitrate;
                         const colorizedBitrate = (bitrate + ' Kb/s').irc.red();
@@ -75,10 +77,9 @@ module.exports = class radio {
                         const colorizedListeners = listeners.toString().irc.red();
 
                         const tagData = [
-                            nowplay,
+                            artist,
+                            song,
                             bitrate,
-                            chan.radioname,
-                            chan.mbID,
                             listeners,
                         ];
                         bot.say(event.channel, `🎛 ${prefix} - ${nowplay} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });

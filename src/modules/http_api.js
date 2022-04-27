@@ -6,9 +6,33 @@ const fetch = require('node-fetch');
 const utils = require('../misc/utils.js');
 const Channel = require('../lib/channel');
 const ircPromises = require('../lib/ircPromises');
+const Yourls = require('node-yourls/yourls');
+require('irc-colors').global();
 
 module.exports = class HttpAPI {
+
+    shortenURL(url, title) {
+        return new Promise((resolve, reject) => {
+            this.shortener.shorten(
+                url,
+                title,
+                (error, result) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    return resolve(result);
+                },
+            );
+        });
+    }
+    
     constructor(bot, config, channels, dbCon) {
+        
+        const yourlsUrl = config.yourls_url;
+        const yourlsApi = config.yourls_api;
+
+        this.shortener = new Yourls(yourlsUrl, yourlsApi);
+        
         this.bot = bot;
         this.channels = channels;
         this.dbCon = dbCon;
@@ -38,6 +62,7 @@ module.exports = class HttpAPI {
         this.koa.use(this.api.allowedMethods());
 
         this.koa.listen(3000, '127.0.0.1');
+        //this.koa.listen(3000);
     }
 
     async handleAddBot(ctx) {
@@ -283,6 +308,8 @@ module.exports = class HttpAPI {
         if (!chan) {
             return failValidation('not in the channel');
         }
+        
+        const shortener = await this.shortenURL('https://media.simosnap.com/player/'+chan.mbID , 'Media Player ' + chan.radioname);
 
         if (isNaN(announce)) {
             return failValidation('not number');
@@ -304,8 +331,10 @@ module.exports = class HttpAPI {
             if (error) throw error;
 
             chan.announce = parseInt(announce);
+            
 
             chan.timer = timer;
+            //chan.timer = 1;
             if (chan.announce === 1) {
                 if (this.bot.modules['radio.js'].jobs[chan.name]) {
                     clearInterval(this.bot.modules['radio.js'].jobs[chan.name]);
@@ -313,11 +342,16 @@ module.exports = class HttpAPI {
                 }
 
                 const timeoutID = setInterval(() => {
+                    const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
+                    const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
+                        
                     const tagData = [
                         chan.radioname,
                         chan.mbID,
                     ];
-                    this.bot.say(chan.name, 'Ascolta ' + chan.radioname + ' - ' + chan.motd + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_station': tagData.join(';') });
+                    this.bot.say(chan.name, `🎛 ${prefix} - ${chan.motd} ${suffix}`, { '+simosnap.org/radio_station': tagData.join(';') });
+                    
+                    //this.bot.say(chan.name, 'Ascolta ' + chan.radioname + ' - ' + chan.motd + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_station': tagData.join(';') });
                 }, (60000 * chan.timer));
                 this.bot.modules['radio.js'].jobs[chan.name] = timeoutID;
             } else {
@@ -365,6 +399,8 @@ module.exports = class HttpAPI {
         if (!chan) {
             return failValidation('not in the channel');
         }
+        
+        const shortener = await this.shortenURL('https://media.simosnap.com/player/'+chan.mbID , 'Media Player ' + chan.radioname);
 
         if (isNaN(nowplay)) {
             return failValidation('not number');
@@ -387,16 +423,28 @@ module.exports = class HttpAPI {
                         return;
                     }
 
+                        
+                    const prefix = ('Ascolta ' + chan.radioname).irc.teal.bold();
+                    const suffix = ('[https://ilnk.stream/' + shortener.url.keyword+']').irc.teal();
+
                     const artist = json.icestats.source.artist;
                     const song = json.icestats.source.artist;
                     const nowplaying = json.icestats.source.yp_currently_playing;
+                    const bitrate = json.icestats.source.bitrate;
+                    const colorizedBitrate = (bitrate + ' Kb/s').irc.red();
+                    const listeners = json.icestats.source.listeners;
+                    const colorizedListeners = listeners.toString().irc.red();                   
+                    
 
                     const tagData = [
                         artist,
                         song,
+                        bitrate,
+                        listeners,
                     ];
-                    this.bot.say(chan.name, '[ Adesso su ' + chan.radioname + ' ] ' + nowplaying + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_stream': tagData.join(';') });
-                }, (60000 * 5));
+                    this.bot.say(chan.name, `🎛 ${prefix} - ${nowplaying} - ${colorizedBitrate} - ${colorizedListeners} ascoltatori ${suffix}`, { '+simosnap.org/radio_stream': tagData.join(';') });
+                    //this.bot.say(chan.name, '[ Adesso su ' + chan.radioname + ' ] ' + nowplaying + ' https://media.simosnap.com/player/' + chan.mbID, { '+simosnap.org/radio_stream': tagData.join(';') });
+                }, (60000 * 6));
                 this.bot.modules['radio.js'].playjobs[chan.name] = timeoutID;
             } else {
                 clearInterval(this.bot.modules['radio.js'].playjobs[chan.name]);
