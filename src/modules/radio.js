@@ -154,6 +154,7 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.dj = event.botParams[1];
                     bot.notice(event.nick, 'Hai impostato il Dj della stazione radio con successo');
+                    bot.tagmsg(event.replyTarget, { '+simosnap.org/radio_update': '1' });
                 });
                 break;
             }
@@ -171,6 +172,7 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.requests = 0;
                     bot.notice(event.nick, 'Rimuovendo il Dj, le richieste musicali sono state disabilitate automaticamente');
+                    bot.tagmsg(event.replyTarget, { '+simosnap.org/radio_update': '1' });
                 });
                 break;
             }
@@ -314,6 +316,7 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.requests = 0;
                     bot.notice(event.nick, 'Hai disabilitato la ricezione di richieste musicali');
+                    bot.tagmsg(event.replyTarget, { '+simosnap.org/radio_update': '1' });
                 });
                 break;
             }
@@ -377,6 +380,7 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.twitch = event.botParams[1];
                     bot.notice(event.nick, 'Hai impostato il canale Twitch della stazione radio con successo');
+                    bot.tagmsg(event.replyTarget, { '+simosnap.org/radio_update': '1' });
                 });
                 break;
             }
@@ -389,6 +393,7 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.twitch = '';
                     bot.notice(event.nick, 'Hai rimosso il canale Twitch della stazione radio con successo');
+                    bot.tagmsg(event.replyTarget, { '+simosnap.org/radio_update': '1' });
                 });
                 break;
             }
@@ -463,6 +468,7 @@ module.exports = class radio {
                     if (error) throw error;
                     chan.motd = event.botParams[1];
                     bot.notice(event.nick, 'Hai aggiornato il MOTD della stazione radio con successo');
+                    bot.tagmsg(event.replyTarget, { '+simosnap.org/radio_update': '1' });
                 });
                 break;
             }
