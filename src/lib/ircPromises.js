@@ -74,7 +74,7 @@ exports.partChan = function (bot, remChan, dbCon) {
         };
 
         dbCon.query('DELETE FROM magirc_mediabot_main WHERE name = ?', [remChan.name], function (error, results, fields) {
-            if (error) { reject(error); return; }
+            if (error) { reject(error); }
         });
 
         removeListeners = () => {

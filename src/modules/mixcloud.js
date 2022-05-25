@@ -1,9 +1,8 @@
 const mixcloudfetch = require('../misc/mixcloud.js');
 const Yourls = require('node-yourls/yourls');
-require('irc-colors').global()
+require('irc-colors').global();
 
 module.exports = class mixcloud {
-
     shortenURL(url, title) {
         return new Promise((resolve, reject) => {
             this.shortener.shorten(
@@ -20,12 +19,11 @@ module.exports = class mixcloud {
     }
 
     constructor(bot, config, channels, dbCon) {
-
         const yourlsUrl = config.yourls_url;
         const yourlsApi = config.yourls_api;
-        
+
         this.shortener = new Yourls(yourlsUrl, yourlsApi);
-                
+
         this.mixcloudRegex = /^(?:(?:https?:)?\/\/)?(?:(?:www\.mixcloud\.com))\/(?<mixID>([\w-]+)\/([\w-]+)(?:(?:\/?)))?$/;
 
         bot.on('message', async(event) => {
@@ -46,7 +44,7 @@ module.exports = class mixcloud {
             const match = event.message.match(this.mixcloudRegex);
 
             if (!match || !match.groups.mixID) {
-                //console.log('returning from match');
+                // console.log('returning from match');
                 return;
             }
 
@@ -57,9 +55,9 @@ module.exports = class mixcloud {
 
             const mediUrl = new URL('https://www.simosnap.org/channel/' + encodeURIComponent(event.target) + '/profile#mediabot');
             const shortener = await this.shortenURL(mediUrl.href, 'MediaBot Timeline del canale' + event.target);
-            
+
             const prefix = 'MixCloud'.irc.bold.purple();
-            const suffix = ('[MediaBot Timeline - https://ilnk.page/' + shortener.url.keyword + ']').irc.teal();
+            const suffix = ('[ MediaBot Timeline - https://ilnk.page/' + shortener.url.keyword + ' ]').irc.teal();
             const tagData = [
                 match.groups.mixID,
                 info.audio_length,

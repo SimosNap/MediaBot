@@ -4,7 +4,6 @@ const Yourls = require('node-yourls/yourls');
 require('irc-colors').global();
 
 module.exports = class rssnews {
-    
     shortenURL(url, title) {
         return new Promise((resolve, reject) => {
             this.shortener.shorten(
@@ -21,7 +20,6 @@ module.exports = class rssnews {
     }
 
     constructor(bot, config, channels, dbCon) {
-
         const yourlsUrl = config.yourls_url;
         const yourlsApi = config.yourls_api;
 
@@ -61,7 +59,7 @@ module.exports = class rssnews {
 
                             Object.assign(feeds[key].data, feed.items[0]);
                             feeds[key].last = feed.items[0].link;
-                            feeds[key].data.shorturl =  'https://ilnk.news/' + shortener.url.keyword;
+                            feeds[key].data.shorturl = 'https://ilnk.news/' + shortener.url.keyword;
                         }
                     } catch (error) {
                         return;
@@ -71,12 +69,12 @@ module.exports = class rssnews {
                 // for (const chan in Object.values(channels)) {
                 for (const key in channels) {
                     const chan = channels[key];
-                    
+
                     if (!channelfeed[chan.name]) {
                         channelfeed[chan.name] = {};
                     }
-                    //console.log(chan.name, channelfeed[chan.name]);
-                    
+                    // console.log(chan.name, channelfeed[chan.name]);
+
                     if ((chan.subscriptions.length !== 0) && (chan.rss === 1)) {
                         const subscriptions = chan.subscriptions.split('|');
 
@@ -90,7 +88,7 @@ module.exports = class rssnews {
                                     // console.log('last:', channelfeed[chan.name][subscription].last);
 
                                 } else {
-                                    const suffix = ('['+feeds[subscription].data.shorturl+']').irc.teal();
+                                    const suffix = ('[ ' + feeds[subscription].data.shorturl + ' ]').irc.teal();
                                     const tagData = [
                                         feeds[subscription].title.replace(/ +(?= )/g, ''),
                                         feeds[subscription].tag,

@@ -9,6 +9,7 @@
         "lint": "eslint ./"
     },
     "dependencies": {
+        "express": "^4.18.1",
         "irc-colors": "^1.5.0",
         "irc-framework": "^4.12.1",
         "json5": "^2.2.1",
@@ -19,7 +20,9 @@
         "node-cron": "^3.0.0",
         "node-fetch": "2",
         "node-yourls": "^1.0.4",
-        "rss-parser": "^3.12.0"
+        "rss-parser": "^3.12.0",
+        "twitter-api-v2": "^1.12.0",
+        "twitter-webhooks": "^0.3.3"
     },
     "devDependencies": {
         "eslint": "^7.32.0",
