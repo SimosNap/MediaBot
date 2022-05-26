@@ -237,7 +237,7 @@ module.exports = class HttpAPI {
             return failValidation('not valid URL');
         }
 
-        if ((twitch) && (!utils.isValidSecureURL(twitch))) {
+        if ((twitch) && (!utils.isValidSecureURL('https://player.twitch.tv/?channel='+twitch))) {
             return failValidation('invalid twitch channel URL');
         }
 
