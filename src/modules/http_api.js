@@ -467,13 +467,15 @@ module.exports = class HttpAPI {
 
                     const prefix = ('Adesso su ' + chan.radioname).irc.teal.bold();
                     const suffix = ('[https://ilnk.stream/' + shortener.url.keyword + ']').irc.teal();
+                    
+                    const source = (Array.isArray(json.icestats.source)) ? json.icestats.source[0] : json.icestats.source;
 
-                    const artist = json.icestats.source.artist;
-                    const song = json.icestats.source.artist;
-                    const nowplaying = json.icestats.source.yp_currently_playing;
-                    const bitrate = json.icestats.source.bitrate;
+                    const artist = source.artist;
+                    const song = source.artist;
+                    const nowplaying = source.yp_currently_playing;
+                    const bitrate = source.bitrate;
                     const colorizedBitrate = (bitrate + ' Kb/s').irc.red();
-                    const listeners = json.icestats.source.listeners;
+                    const listeners = source.listeners;
                     const colorizedListeners = listeners.toString().irc.red();
 
                     const tagData = [
