@@ -44,7 +44,7 @@ module.exports = class rssnews {
 
         const channelfeed = {};
 
-        cron.schedule('*/15 * * * *', () => {
+        cron.schedule('*/1 * * * *', () => {
             (async() => {
                 for (const key in feeds) {
                     // console.log(`${key}: ${feeds[key].feed}`);
@@ -73,7 +73,6 @@ module.exports = class rssnews {
                     if (!channelfeed[chan.name]) {
                         channelfeed[chan.name] = {};
                     }
-                    // console.log(chan.name, channelfeed[chan.name]);
 
                     if ((chan.subscriptions.length !== 0) && (chan.rss === 1)) {
                         const subscriptions = chan.subscriptions.split('|');
@@ -83,7 +82,7 @@ module.exports = class rssnews {
                                 channelfeed[chan.name][subscription] = { last: '' };
                             }
 
-                            if (feeds[subscription].data) {
+                            if (feeds[subscription] && feeds[subscription].data) {
                                 if (feeds[subscription].data.link === channelfeed[chan.name][subscription].last) {
                                     // console.log('last:', channelfeed[chan.name][subscription].last);
 
