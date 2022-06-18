@@ -44,7 +44,7 @@ module.exports = class rssnews {
 
         const channelfeed = {};
 
-        cron.schedule('*/1 * * * *', () => {
+        cron.schedule('*/10 * * * *', () => {
             (async() => {
                 for (const key in feeds) {
                     // console.log(`${key}: ${feeds[key].feed}`);
