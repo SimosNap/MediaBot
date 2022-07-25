@@ -34,7 +34,7 @@ module.exports = class oroscopo {
         const feedUrl = 'https://it.horoscopofree.com/rss/horoscopofree-it.rss';
         const signUrl = 'https://it.horoscopofree.com/partner-';
 
-        const signs = ['ariete','sagittario','pesci','acquario','capricorno','scorpione','bilancia','vergine','leone','cancro','gemelli','toro'];
+        const signs = ['ariete','sagittario','pesci','aquario','capricorno','scorpione','bilancia','vergine','leone','cancro','gemelli','toro'];
         
         this.cache = {};
         this.cacheDate = 0;
