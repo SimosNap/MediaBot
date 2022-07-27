@@ -21,6 +21,7 @@
         "node-fetch": "2",
         "node-html-parser": "^5.3.3",
         "node-yourls": "^1.0.4",
+        "openweather-apis": "^4.4.2",
         "rss-parser": "^3.12.0",
         "twitter-api-v2": "^1.12.0",
         "twitter-webhooks": "^0.3.3"

@@ -77,12 +77,12 @@ module.exports = class oroscopo {
                         //const shortUrl = await this.shortenURL(signData.guid, signData.title);
                         const shortUrl = await this.shortenURL(link, signData.title);
                         //const parsedHtml = HTMLParser.parse(signData['content:encoded']);
-                        console.log(signData);
+                        //console.log(signData);
                         //let content = parsedHtml.querySelector('p.horoscope').text;
                         let content = signData.content;
                         if (content.length > 200) {
                             // regex will split at word boundaries to make string <= 200 (plus ' ...')
-                            content = content.match(/.{1,200}(?=\s)|.+$/g)[0] + ' ...';
+                            content = content.match(/.{1,225}(?=\s)|.+$/g)[0] + ' ...';
                         }
 
                         this.cache[sign] = {
