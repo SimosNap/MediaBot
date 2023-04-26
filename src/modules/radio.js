@@ -56,10 +56,15 @@ module.exports = class radio {
 
                 if (chan.nowplay === 1) {
                     const timeoutID = setInterval(async() => {
-                        const json = await fetch(chan.icestats).then((r) => r.json());
+                        const json = await fetch(chan.icestats).then((r) => {
+                            //console.log(chan.icestats, r);
+                            r.json();
+                        }).catch((err) => { console.log(err) });
+                       
                         if (!json) {
                             return;
                         }
+                        //console.log(json);
 
                         // const artist = json.icestats.source.artist;
                         // const song = json.icestats.source.song;

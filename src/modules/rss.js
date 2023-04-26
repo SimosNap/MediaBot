@@ -47,7 +47,7 @@ module.exports = class rssnews {
         cron.schedule('*/10 * * * *', () => {
             (async() => {
                 for (const key in feeds) {
-                    // console.log(`${key}: ${feeds[key].feed}`);
+                    //console.log(`${key}: ${feeds[key].feed}`);
                     try {
                         const feed = await parser.parseURL(feeds[key].feed);
 
