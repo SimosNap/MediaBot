@@ -23,6 +23,8 @@ module.exports = class youtube {
         const yourlsApi = config.yourls_api;
 
         this.shortener = new Yourls(yourlsUrl, yourlsApi);
+		
+		this.lastRequests = {};
 
         this.youtubeRegex = /((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|v\/)?)(?<ytID>[\w-]+)(\S+)?/i;
 
@@ -37,6 +39,7 @@ module.exports = class youtube {
 
             const chan = channels[event.target.toLowerCase()]; if (!chan) { console.error('i expected a channel object'); return; }
 
+
             if (chan && chan.youtube === 0) {
                 return;
             };
@@ -46,6 +49,20 @@ module.exports = class youtube {
                 // console.log('returning from match');
                 return;
             }
+			
+			if (!this.lastRequests[chan]) { this.lastRequests[chan] = []; }
+
+            if (this.lastRequests[chan][match.groups.ytID] && this.lastRequests[chan][match.groups.ytID] + 6000 > Date.now()) { 
+                console.log("Flood!");
+                //bot.notice(event.nick, 'Troppe richieste consecutive nel canale, attendi qualche secondo.');
+                return;
+            }
+            
+            this.lastRequests[chan][match.groups.ytID] = Date.now();
+			
+			this.lastRequests[chan].unshift({id: match.groups.ytID, when: Date.now()});
+			if (this.lastRequests.length > 10) { this.lastRequests.length = 10 }
+
 
             const info = await tubefetch.getYoutubeInfo(match.groups.ytID);
             if (!info) {
