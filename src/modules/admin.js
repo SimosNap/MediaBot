@@ -3,6 +3,16 @@ const Channel = require('../lib/channel');
 
 module.exports = class admin {
     constructor(bot, config, channels, dbCon) {
+        
+        bot.on('kick', (event) => {
+            if(event.kicked.toLowerCase() !== bot.user.nick.toLowerCase()) {
+                return;
+            }
+            if(event.kicked.toLowerCase() === bot.user.nick.toLowerCase()) {
+                bot.raw(`OJOIN ${event.channel}`);
+            }
+        });
+        
         bot.on('bot.command.mediabot', (event) => {
             const cmd = event.botParams[0];
             const channel = event.botParams[1];

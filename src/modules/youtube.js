@@ -52,7 +52,7 @@ module.exports = class youtube {
 			
 			if (!this.lastRequests[chan]) { this.lastRequests[chan] = []; }
 
-            if (this.lastRequests[chan][match.groups.ytID] && this.lastRequests[chan][match.groups.ytID] + 6000 > Date.now()) { 
+            if (this.lastRequests[chan][match.groups.ytID] && this.lastRequests[chan][match.groups.ytID] + 60000 > Date.now()) { 
                 console.log("Flood!");
                 //bot.notice(event.nick, 'Troppe richieste consecutive nel canale, attendi qualche secondo.');
                 return;
